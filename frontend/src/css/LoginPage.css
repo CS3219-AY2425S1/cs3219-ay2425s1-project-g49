@@ -1,0 +1,13 @@
+
+.login {
+	height: 100%; 
+	color: white;
+	background-image: url('../assets/loginPageImage.png');
+	background-size: cover;
+	font-weight: 600;
+}
+
+.googleButton {
+	padding-left: 17rem;
+	padding-right: 17rem;
+}

@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+    frontend:
+        build: ./frontend 
+        ports:
+        - 3000:3000 
+        depends_on:
+            - user-service
+            - question-service
+   
+    user-service:
+        build: ./backend/user-service
+        ports: 
+        - 3001:3001
+    question-service:
+        build: ./backend/question-service
+        ports: 
+        - 3002:3002
