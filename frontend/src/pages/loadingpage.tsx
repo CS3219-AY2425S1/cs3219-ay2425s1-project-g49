@@ -75,22 +75,20 @@ const LoadingPage: React.FC = () => {
       ...requestData,
       timeStamp: new Date().toISOString(),
     };
-    if (matchData) {
-      fetch("http://localhost:3009/rabbitmq/enter", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(retryData),
+    fetch("http://localhost:3009/rabbitmq/enter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(retryData),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Retry successful", result);
       })
-        .then((response) => response.json())
-        .then((result) => {
-          console.log("Retry successful", result);
-        })
-        .catch((error) => {
-          console.error("Error during retry:", error);
-        });
-    }
+      .catch((error) => {
+        console.error("Error during retry:", error);
+      });
   };
 
 
