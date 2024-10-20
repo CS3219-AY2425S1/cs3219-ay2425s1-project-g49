@@ -2,6 +2,7 @@ import { Controller, Post, Body, Sse, Param, MessageEvent } from '@nestjs/common
 import { RabbitMQService } from './rabbitmq.service';
 import { EnterQueueDto } from 'src/dto/EnterQueue.dto';
 import { map, Observable, Subject, interval } from 'rxjs';
+import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
 
 @Controller('rabbitmq')
 export class RabbitMQController {
@@ -18,6 +19,13 @@ export class RabbitMQController {
   consumeMessages() {
     this.rabbitMQService.consumeQueue();
     return { status: 'Started consuming queue' };
+  }
+
+  @Post('match_declined')
+  handleDecline(@Body() declineMatchDto: DeclineMatchDto) {
+    console.log("Endpoint reached")
+    this.rabbitMQService.handleMatchDecline(declineMatchDto);
+    return { status: 'Processing decline' };
   }
 
   @Sse(':userEmail')

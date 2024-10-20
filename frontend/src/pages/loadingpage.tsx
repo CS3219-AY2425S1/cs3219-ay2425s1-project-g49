@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Loader, Button, Header, Container } from "semantic-ui-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import "semantic-ui-css/semantic.min.css";
+import { timeStamp } from "console";
 
 interface CustomJwtPayload extends JwtPayload {
   email?: string;
@@ -14,6 +15,9 @@ const LoadingPage: React.FC = () => {
   const [countdown, setCountdown] = useState(30);
   const [matchFound, setMatchFound] = useState(false);
   const [matchData, setMatchData] = useState<any>(null);
+  const [matchDeclined, setMatchDeclined] = useState(false);
+  const location = useLocation();
+  const requestData = location.state;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -37,16 +41,23 @@ const LoadingPage: React.FC = () => {
     );
     console.log("connected");
     eventSource.onmessage = (event) => {
-      console.log("EVENT IS", event);
       const data = JSON.parse(event.data);
-      if (data.userEmail === decodedToken?.email) {
-        setMatchFound(true);
-        setMatchData(data);
-        clearInterval(timer);
-      } else {
-        console.log("Error");
-        console.log(data.userEmail);
-        console.log(decodedToken?.email);
+      console.log("Data received is", data);
+      if (data.event === "Match") {
+        if (data.userEmail === decodedToken?.email) {
+          setMatchFound(true);
+          setMatchData(data);
+          clearInterval(timer);
+        } else {
+          console.log("Error");
+          console.log(data.userEmail);
+          console.log(decodedToken?.email);
+        }
+      } else if (data.event === "Decline") {
+        if (data.userEmail === decodedToken?.email) {
+          setMatchDeclined(true)
+          clearInterval(timer);
+        }
       }
     };
 
@@ -54,19 +65,23 @@ const LoadingPage: React.FC = () => {
       clearInterval(timer);
       eventSource.close();
     };
-  }, [countdown, matchFound]);
+  }, [countdown, matchFound, matchDeclined]);
 
   const resetTimer = () => {
     setCountdown(30);
     setMatchFound(false);
+    setMatchDeclined(false);
+    const retryData = {
+      ...requestData,
+      timeStamp: new Date().toISOString(),
+    };
     if (matchData) {
-      const updatedData = { ...matchData, timestamp: new Date().toISOString() };
       fetch("http://localhost:3009/rabbitmq/enter", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(retryData),
       })
         .then((response) => response.json())
         .then((result) => {
@@ -77,6 +92,26 @@ const LoadingPage: React.FC = () => {
         });
     }
   };
+
+
+  const handleDecline = () => {
+    console.log("DECLINE PRESSED")
+    fetch("http://localhost:3009/rabbitmq/match_declined", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: matchData.matchEmail }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Decline post successful", result);
+      })
+      .catch((error) => {
+        console.error("Error during decline post:", error);
+      });
+    setMatchDeclined(true)
+  }
 
   const conditionalRender = () => {
     if (countdown > 0 && !matchFound) {
@@ -114,6 +149,30 @@ const LoadingPage: React.FC = () => {
           </div>
         </Container>
       );
+    } else if (matchFound && matchDeclined) {
+      console.log("match declined");
+      console.log("count down is", countdown);
+      return (
+        <Container textAlign="center">
+          <Header as="h1" size="huge" style={{ color: "white" }}>
+            Match declined
+          </Header>
+          <div
+            style={{ display: "flex", justifyContent: "center", gap: "20px" }}
+          >
+            <Button primary size="large" onClick={resetTimer}>
+              Retry
+            </Button>
+            <Button
+              color="red"
+              size="large"
+              onClick={() => navigate("/matching-page")}
+            >
+              Exit
+            </Button>
+          </div>
+        </Container>
+      );
     } else {
       console.log("match found is", matchFound);
       console.log("count down is", countdown);
@@ -128,7 +187,7 @@ const LoadingPage: React.FC = () => {
             <Button
               negative
               size="large"
-              onClick={() => navigate("/matching-page")}
+              onClick={handleDecline}
             >
               Decline
             </Button>

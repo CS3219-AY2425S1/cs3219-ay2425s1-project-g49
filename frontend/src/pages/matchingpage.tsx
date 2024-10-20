@@ -64,7 +64,7 @@ export default function MatchingPage() {
             
             if (response.ok) {
                 console.log('Request sent successfully');
-                navigate('/loading');
+                navigate('/loading',  { state: requestData });
             } else {
                 console.error('Failed to send request');
             }

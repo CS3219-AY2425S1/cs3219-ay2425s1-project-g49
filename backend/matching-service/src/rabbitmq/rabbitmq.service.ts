@@ -3,11 +3,13 @@ import * as amqp from 'amqplib/callback_api.js';
 import { EnterQueueDto } from 'src/dto/EnterQueue.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
+import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly eventEmitter: EventEmitter2) { }
   private readonly matchBuffer: Record<string, any[]> = {};
+  private readonly declineBuffer: Record<string, any[]> = {};
   private readonly connectedUsers: Set<string> = new Set();
   private readonly queueName = 'matching_queue';
   private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672';
@@ -85,9 +87,9 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       const keyToRemove = Object.keys(this.unmatchedRequests).find(
         (key) => this.unmatchedRequests[key].email === email,
       );
-      console.log('key to remove is', keyToRemove);
 
       if (keyToRemove) {
+        console.log('key to remove is', keyToRemove);
         delete this.unmatchedRequests[keyToRemove];
         console.log(
           `User ${email} removed from queue after 30 seconds of no match.`,
@@ -136,7 +138,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       const matchedUser = this.unmatchedRequests[matchingKey];
       console.log(`Match found between ${email} and ${matchedUser.email}`);
       delete this.unmatchedRequests[matchingKey];
-      this.notifyMatchFound(email, matchedUser.email);
+      this.notifyMatchFound(email, matchedUser.email, "Perfect");
     } else if (
       Object.values(this.unmatchedRequests).find(
         (req) => req.categories === categories,
@@ -150,24 +152,30 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       );
       const partialMatchingKey = `${matchedUser.categories}-${matchedUser.complexity}-${matchedUser.language}`;
       delete this.unmatchedRequests[partialMatchingKey];
-      this.notifyMatchFound(email, matchedUser.email);
+      this.notifyMatchFound(email, matchedUser.email, "Partial");
     } else {
       this.unmatchedRequests[matchingKey] = userRequest;
       console.log(`No match found for user ${email}, waiting for a match...`);
     }
   }
 
-  notifyMatchFound(userEmail: string, matchEmail: string) {
+  notifyMatchFound(userEmail: string, matchEmail: string, matchStatus: string) {
     console.log('connected users are', this.connectedUsers);
     const time = new Date().toISOString();
     const userData = {
+      event: "Match",
       userEmail: userEmail,
+      matchEmail: matchEmail,
       timestamp: time,
+      matchStatus: matchStatus,
     };
 
     const matchData = {
+      event: "Match",
       userEmail: matchEmail,
+      matchEmail: userEmail,
       timestamp: time,
+      matchStatus: matchStatus,
     };
 
     if (this.connectedUsers.has(userData.userEmail)) {
@@ -189,10 +197,40 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  handleMatchDecline(declineMatchDto: DeclineMatchDto) {
+    const { email } = declineMatchDto;
+    const declineData = {
+      event: "Decline",
+      userEmail: email,
+    }
+    if (this.connectedUsers.has(email)) {
+      console.log(email, " for match declined")
+      this.eventEmitter.emit('match.declined', declineData);
+    } else {
+      if (!this.declineBuffer[email]) {
+        this.declineBuffer[email] = []; // Create an array if it doesn't exist
+      }
+      this.declineBuffer[email].push(declineData);
+    }
+  }
+
   createSSEStream(userEmail: string): Observable<any> {
     return new Observable((subscriber) => {
       this.connectedUsers.add(userEmail);
       // console.log(this.connectedUsers);
+
+      if (this.declineBuffer[userEmail]) {
+        console.log(
+          'Notifying buffered declined match for ',
+          userEmail,
+          ':',
+          this.declineBuffer[userEmail],
+        );
+        this.declineBuffer[userEmail].forEach((data) => {
+          subscriber.next(JSON.stringify(data)); // Notify each buffered event
+        });
+        delete this.declineBuffer[userEmail];
+      }
 
       if (this.matchBuffer[userEmail]) {
         console.log(
@@ -209,13 +247,22 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
       const handleMatchFound = (data) => {
         subscriber.next(JSON.stringify(data));
-        console.log('Notifying', data);
+        console.log('Notifying match found', data);
+      };
+
+      const handleMatchDeclined = (data) => {
+        if (userEmail === data.userEmail) {
+          subscriber.next(JSON.stringify(data));
+          console.log('Notifying match declined to ', userEmail, data);
+        }
       };
 
       this.eventEmitter.on('match.found', handleMatchFound);
+      this.eventEmitter.on('match.declined', handleMatchDeclined);
 
       return () => {
         this.eventEmitter.off('match.found', handleMatchFound);
+        this.eventEmitter.off('match.declined', handleMatchDeclined);
         this.connectedUsers.delete(userEmail);
         // console.log('after cleanup ', this.connectedUsers);
       };
