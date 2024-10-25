@@ -14,8 +14,8 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private readonly acceptBuffer: Record<string, any[]> = {};
   private readonly connectedUsers: Set<string> = new Set();
   private readonly queueName = 'matching_queue';
-  // private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
-  private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
+  private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
+  // private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
   private connection: amqp.Connection;
   private channel: amqp.Channel;
   private unmatchedRequests: Record<string, any> = {};
