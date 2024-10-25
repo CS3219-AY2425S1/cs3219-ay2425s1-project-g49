@@ -4,7 +4,7 @@ import {
 } from 'class-validator';
 
 
-export class DeclineMatchDto {
+export class AcceptMatchDto {
   @IsNotEmpty()
   @IsString()
   email: string;

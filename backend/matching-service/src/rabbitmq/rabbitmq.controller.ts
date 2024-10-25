@@ -3,6 +3,7 @@ import { RabbitMQService } from './rabbitmq.service';
 import { EnterQueueDto } from 'src/dto/EnterQueue.dto';
 import { map, Observable, Subject, interval } from 'rxjs';
 import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
+import { AcceptMatchDto } from 'src/dto/AcceptMatch.dto';
 
 @Controller('rabbitmq')
 export class RabbitMQController {
@@ -23,9 +24,16 @@ export class RabbitMQController {
 
   @Post('match_declined')
   handleDecline(@Body() declineMatchDto: DeclineMatchDto) {
-    console.log("Endpoint reached")
+    console.log("Decline Endpoint reached")
     this.rabbitMQService.handleMatchDecline(declineMatchDto);
     return { status: 'Processing decline' };
+  }
+
+  @Post('match_accepted')
+  handleAccept(@Body() acceptMatchDto: AcceptMatchDto) {
+    console.log("Accept Endpoint reached")
+    this.rabbitMQService.handleMatchAccept(acceptMatchDto);
+    return { status: 'Processing accept' };
   }
 
   @Sse(':userEmail')
