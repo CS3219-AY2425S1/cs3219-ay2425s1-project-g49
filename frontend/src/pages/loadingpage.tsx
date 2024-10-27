@@ -16,8 +16,11 @@ const LoadingPage: React.FC = () => {
   const [matchFound, setMatchFound] = useState(false);
   const [matchData, setMatchData] = useState<any>(null);
   const [matchDeclined, setMatchDeclined] = useState(false);
+  const [matchAccepted, setMatchAccepted] = useState(false);
+  const [userAccepted, setUserAccepted] = useState(false);
   const location = useLocation();
   const requestData = location.state;
+
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -39,7 +42,7 @@ const LoadingPage: React.FC = () => {
     const eventSource = new EventSource(
       `http://localhost:3009/rabbitmq/${decodedToken?.email}`
     );
-    console.log("connected");
+    // console.log("connected");
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log("Data received is", data);
@@ -49,28 +52,46 @@ const LoadingPage: React.FC = () => {
           setMatchData(data);
           clearInterval(timer);
         } else {
-          console.log("Error");
-          console.log(data.userEmail);
+          console.log("Error in handline Match event");
+          console.log(data);
           console.log(decodedToken?.email);
         }
       } else if (data.event === "Decline") {
         if (data.userEmail === decodedToken?.email) {
           setMatchDeclined(true)
           clearInterval(timer);
+        } else {
+          console.log("Error in handline Decline event");
+          console.log(data);
+          console.log(decodedToken?.email);
+        }
+      } else if (data.event === "Accept") {
+        if (data.userEmail === decodedToken?.email) {
+          setMatchAccepted(true)
+          if (userAccepted) {
+            navigate('/collaboration-page')
+          }
+          clearInterval(timer);
+        } else {
+          console.log("Error in handline Accept event");
+          console.log(data);
+          console.log(decodedToken?.email);
         }
       }
     };
-
     return () => {
       clearInterval(timer);
       eventSource.close();
     };
-  }, [countdown, matchFound, matchDeclined]);
+  }, [countdown, matchFound, matchDeclined, matchAccepted, userAccepted]);
 
   const resetTimer = () => {
     setCountdown(30);
     setMatchFound(false);
     setMatchDeclined(false);
+    setMatchAccepted(false);
+    setUserAccepted(false);
+    setMatchData(null);
     const retryData = {
       ...requestData,
       timeStamp: new Date().toISOString(),
@@ -111,94 +132,154 @@ const LoadingPage: React.FC = () => {
     setMatchDeclined(true)
   }
 
+  const handleAccept = () => {
+    console.log("ACCEPT PRESSED")
+    fetch("http://localhost:3009/rabbitmq/match_accepted", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: matchData.matchEmail }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Accept post successful", result);
+      })
+      .catch((error) => {
+        console.error("Error during accept post:", error);
+      });
+    setUserAccepted(true);
+    if (matchAccepted) {
+      navigate('/collaboration-page')
+    }
+  }
+
   const conditionalRender = () => {
-    if (countdown > 0 && !matchFound) {
-      return (
-        <Loader
-          active
-          inverted
-          indeterminate
-          size="massive"
-          content={`Matching in ${countdown} seconds`}
-        />
-      );
-    } else if (countdown <= 0 && !matchFound) {
-      return (
-        <Container textAlign="center">
-          <Header as="h1" size="huge" style={{ color: "white" }}>
-            Unable to find a match
-          </Header>
-          <Header as="h2" size="large" style={{ color: "white" }}>
-            Retry matchmaking?
-          </Header>
-          <div
-            style={{ display: "flex", justifyContent: "center", gap: "20px" }}
-          >
-            <Button primary size="large" onClick={resetTimer}>
-              Retry
-            </Button>
-            <Button
-              color="red"
-              size="large"
-              onClick={() => navigate("/matching-page")}
+    if (!matchFound) {
+      if (countdown > 0) {
+        return (
+          <Loader
+            active
+            inverted
+            indeterminate
+            size="massive"
+            content={`Matching in ${countdown} seconds`}
+          />
+        );
+      } else if (countdown <= 0) {
+        return (
+          <Container textAlign="center">
+            <Header as="h1" size="huge" style={{ color: "white" }}>
+              Unable to find a match
+            </Header>
+            <Header as="h2" size="large" style={{ color: "white" }}>
+              Retry matchmaking?
+            </Header>
+            <div
+              style={{ display: "flex", justifyContent: "center", gap: "20px" }}
             >
-              Exit
-            </Button>
-          </div>
-        </Container>
-      );
-    } else if (matchFound && matchDeclined) {
-      console.log("match declined");
-      console.log("count down is", countdown);
-      return (
-        <Container textAlign="center">
-          <Header as="h1" size="huge" style={{ color: "white" }}>
-            Match declined
-          </Header>
-          <div
-            style={{ display: "flex", justifyContent: "center", gap: "20px" }}
-          >
-            <Button primary size="large" onClick={resetTimer}>
-              Retry
-            </Button>
-            <Button
-              color="red"
-              size="large"
-              onClick={() => navigate("/matching-page")}
+              <Button primary size="large" onClick={resetTimer}>
+                Retry
+              </Button>
+              <Button
+                color="red"
+                size="large"
+                onClick={() => navigate("/matching-page")}
+              >
+                Exit
+              </Button>
+            </div>
+          </Container>
+        );
+      }
+    } else if (matchFound) {
+
+      if (matchDeclined) {
+        // console.log("match declined");
+        // console.log("count down is", countdown);
+        return (
+          <Container textAlign="center">
+            <Header as="h1" size="huge" style={{ color: "white" }}>
+              Match declined
+            </Header>
+            <div
+              style={{ display: "flex", justifyContent: "center", gap: "20px" }}
             >
-              Exit
-            </Button>
-          </div>
-        </Container>
-      );
-    } else {
-      console.log("match found is", matchFound);
-      console.log("count down is", countdown);
-      return (
-        <Container textAlign="center">
-          <Header as="h1" size="huge" style={{ color: "white" }}>
-            Match Found
-          </Header>
-          <div
-            style={{ display: "flex", justifyContent: "center", gap: "20px" }}
-          >
-            <Button
-              negative
-              size="large"
-              onClick={handleDecline}
+              <Button primary size="large" onClick={resetTimer}>
+                Retry
+              </Button>
+              <Button
+                color="red"
+                size="large"
+                onClick={() => navigate("/matching-page")}
+              >
+                Exit
+              </Button>
+            </div>
+          </Container>
+        );
+      } else if (userAccepted && !matchAccepted) {
+        return (
+          <Loader
+            active
+            inverted
+            indeterminate
+            size="massive"
+            content={"Wating for match to accept"}
+          />
+        )
+
+      } else if (!userAccepted && matchAccepted) {
+        return (
+          <Container textAlign="center" style={{ position: 'relative' }}>
+            <Loader
+              active
+              inverted
+              indeterminate
+              size="massive"
+              content="Match has accepted collaboration..."
+              style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }} // Center the loader
+            />
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', position: 'relative', zIndex: 2, marginTop: '200px'}} >
+              <Button negative size="large" onClick={handleDecline}>
+                Decline
+              </Button>
+              <Button positive size="large" onClick={handleAccept}>
+                Accept
+              </Button>
+            </div>
+          </Container >
+        );
+
+      } else {
+        // console.log("match found is", matchFound);
+        // console.log("count down is", countdown);
+        return (
+          <Container textAlign="center">
+            <Header as="h1" size="huge" style={{ color: "white" }}>
+              Match Found
+            </Header>
+            <div
+              style={{ display: "flex", justifyContent: "center", gap: "20px" }}
             >
-              Decline
-            </Button>
-            <Button
-              positive
-              size="large"
-              onClick={() => navigate("/matching-page")}
-            >
-              Accept
-            </Button>
-          </div>
-        </Container>
-      );
+              <Button
+                negative
+                size="large"
+                onClick={handleDecline}
+              >
+                Decline
+              </Button>
+              <Button
+                positive
+                size="large"
+                onClick={handleAccept}
+              >
+                Accept
+              </Button>
+            </div>
+          </Container>
+        );
+      }
     }
   };
 

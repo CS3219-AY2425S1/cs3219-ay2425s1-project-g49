@@ -7,6 +7,7 @@ import LoadingPage from './pages/loadingpage';
 import MatchingPage from './pages/matchingpage';
 import { UserContextProvider } from './UserContextProvider';
 import './App.css';
+import CollaborationPage from './pages/CollaborationPage';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/questions-page' element={<QuestionServicePage />} />
           <Route path='/matching-page' element={<MatchingPage />} />
+          <Route path='/collaboration-page' element={<CollaborationPage/>} />
         </Routes>
       </div>
     </UserContextProvider>

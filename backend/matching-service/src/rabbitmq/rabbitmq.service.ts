@@ -4,15 +4,18 @@ import { EnterQueueDto } from 'src/dto/EnterQueue.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
 import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
+import { AcceptMatchDto } from 'src/dto/AcceptMatch.dto';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly eventEmitter: EventEmitter2) { }
   private readonly matchBuffer: Record<string, any[]> = {};
   private readonly declineBuffer: Record<string, any[]> = {};
+  private readonly acceptBuffer: Record<string, any[]> = {};
   private readonly connectedUsers: Set<string> = new Set();
   private readonly queueName = 'matching_queue';
-  private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672';
+  private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
+  // private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
   private connection: amqp.Connection;
   private channel: amqp.Channel;
   private unmatchedRequests: Record<string, any> = {};
@@ -201,7 +204,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     const { email } = declineMatchDto;
     const declineData = {
       event: "Decline",
-      userEmail: email,
+      userEmail: email,   // Email address to send decline event to
     }
     if (this.connectedUsers.has(email)) {
       console.log(email, " for match declined")
@@ -211,6 +214,23 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         this.declineBuffer[email] = []; // Create an array if it doesn't exist
       }
       this.declineBuffer[email].push(declineData);
+    }
+  }
+
+  handleMatchAccept(acceptMatchDto: AcceptMatchDto) {
+    const { email } = acceptMatchDto;
+    const acceptData = {
+      event: "Accept",
+      userEmail: email,   // Email address to send decline event to
+    }
+    if (this.connectedUsers.has(email)) {
+      console.log(email, " for match accepted")
+      this.eventEmitter.emit('match.accepted', acceptData);
+    } else {
+      if (!this.acceptBuffer[email]) {
+        this.acceptBuffer[email] = []; // Create an array if it doesn't exist
+      }
+      this.acceptBuffer[email].push(acceptData);
     }
   }
 
@@ -230,6 +250,19 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
           subscriber.next(JSON.stringify(data)); // Notify each buffered event
         });
         delete this.declineBuffer[userEmail];
+      }
+
+      if (this.acceptBuffer[userEmail]) {
+        console.log(
+          'Notifying buffered accepted match for ',
+          userEmail,
+          ':',
+          this.acceptBuffer[userEmail],
+        );
+        this.acceptBuffer[userEmail].forEach((data) => {
+          subscriber.next(JSON.stringify(data)); // Notify each buffered event
+        });
+        delete this.acceptBuffer[userEmail];
       }
 
       if (this.matchBuffer[userEmail]) {
@@ -257,12 +290,21 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         }
       };
 
+      const handleMatchAccepted = (data) => {
+        if (userEmail === data.userEmail) {
+          subscriber.next(JSON.stringify(data));
+          console.log('Notifying match accepted to ', userEmail, data);
+        }
+      };
+
       this.eventEmitter.on('match.found', handleMatchFound);
       this.eventEmitter.on('match.declined', handleMatchDeclined);
+      this.eventEmitter.on('match.accepted', handleMatchAccepted);
 
       return () => {
         this.eventEmitter.off('match.found', handleMatchFound);
         this.eventEmitter.off('match.declined', handleMatchDeclined);
+        this.eventEmitter.off('match.accepted', handleMatchAccepted);
         this.connectedUsers.delete(userEmail);
         // console.log('after cleanup ', this.connectedUsers);
       };
