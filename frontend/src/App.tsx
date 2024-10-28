@@ -24,6 +24,7 @@ const App: React.FC = () => {
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/questions-page' element={<QuestionServicePage />} />
           <Route path='/matching-page' element={<MatchingPage />} />
+          <Route path='/collaboration-page/room_id/:roomId' element={<CollaborationPage/>} />
           <Route path='/collaboration-page' element={<CollaborationPage/>} />
         </Routes>
       </div>

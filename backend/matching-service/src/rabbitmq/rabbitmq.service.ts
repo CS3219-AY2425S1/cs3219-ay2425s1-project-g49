@@ -5,6 +5,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
 import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
 import { AcceptMatchDto } from 'src/dto/AcceptMatch.dto';
+import { v4 as uuidv4 } from 'uuid';
+import { CollabRoomDto } from 'src/dto/CollabRoom.dto';
+import { DeleteRoomDto } from 'src/dto/DeleteRoom.dto';
+import { ValidateRoomDto } from 'src/dto/ValidateRoom.dto';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
@@ -12,6 +16,8 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private readonly matchBuffer: Record<string, any[]> = {};
   private readonly declineBuffer: Record<string, any[]> = {};
   private readonly acceptBuffer: Record<string, any[]> = {};
+  private readonly collabRooms: Record<string, any[]> = {};
+  private readonly userRooms: Record<string, string> = {};
   private readonly connectedUsers: Set<string> = new Set();
   private readonly queueName = 'matching_queue';
   private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
@@ -132,7 +138,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       console.error('Cannot consume messages, channel not initialized');
     }
   }
-  //DEBUG HERE
+
   private matchUser(userRequest: EnterQueueDto): void {
     // console.log("unmatched request is", this.unmatchedRequests);
     const { email, categories, complexity, language } = userRequest;
@@ -161,6 +167,54 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       console.log(`No match found for user ${email}, waiting for a match...`);
     }
   }
+
+  generateRoom(userA: string, userB: string): string {
+    const roomID = uuidv4();
+    this.collabRooms[roomID] = [userA, userB];
+    this.userRooms[userA] = roomID;
+    this.userRooms[userB] = roomID;
+    return roomID;
+  }
+
+  handleDeleteRoom(deleteRoomDto: DeleteRoomDto) {
+    const { emailA, emailB, roomId } = deleteRoomDto;
+    if( this.userRooms[emailA]) {
+      delete this.userRooms[emailA];
+    }
+    if( this.userRooms[emailB]) {
+      delete this.userRooms[emailB];
+    }
+    if (this.collabRooms[roomId]) {
+      delete this.collabRooms[roomId]
+    }
+  }
+
+  handleCollabRoom(collabRoomDto: CollabRoomDto): string {
+    const { userEmail, matchEmail } = collabRoomDto;
+    const existingRoomId = this.userRooms[userEmail];
+    const matchUserRoomId = this.userRooms[matchEmail];
+
+    if (!existingRoomId && !matchUserRoomId) {
+      return this.generateRoom(userEmail, matchEmail);
+    } else if (existingRoomId) {
+      return existingRoomId;
+    } else if (matchUserRoomId) {
+      return matchUserRoomId;
+    } else {
+      return 'Error: Both users are already in different rooms.';
+    }
+  }
+
+  handleValidateRoom(validateRoomDto: ValidateRoomDto): boolean {
+    const { email, roomId } = validateRoomDto;
+    if (!this.userRooms[email]) {
+      return false
+    } else {
+      return this.userRooms[email] === roomId;
+    }
+  }
+
+
 
   notifyMatchFound(userEmail: string, matchEmail: string, matchStatus: string) {
     console.log('connected users are', this.connectedUsers);

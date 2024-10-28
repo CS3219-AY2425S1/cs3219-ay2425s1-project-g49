@@ -69,7 +69,18 @@ const LoadingPage: React.FC = () => {
         if (data.userEmail === decodedToken?.email) {
           setMatchAccepted(true)
           if (userAccepted) {
-            navigate('/collaboration-page')
+            getCollabRoomId()
+              .then((roomId) => {
+                console.log("Room ID after fetching:", roomId); // Log the room ID
+                if (roomId) {
+                  navigate(`/collaboration-page/room_id/${roomId}`); // Use the room ID for navigation
+                } else {
+                  console.error("No room ID returned"); // Handle case where no room ID was returned
+                }
+              })
+              .catch((error) => {
+                console.error("Error getting collab room:", error); // Handle any errors that occurred
+              });
           }
           clearInterval(timer);
         } else {
@@ -132,6 +143,30 @@ const LoadingPage: React.FC = () => {
     setMatchDeclined(true)
   }
 
+  const getCollabRoomId = (): Promise<string | null> => {
+    return fetch("http://localhost:3009/rabbitmq/collab_room", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userEmail: matchData.userEmail, matchEmail: matchData.matchEmail }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((result) => {
+        console.log("Collab Room post successful", result);
+        return result.room_id; // Return the room ID
+      })
+      .catch((error) => {
+        console.error("Error during collab Room post:", error);
+        return null; // Explicitly return null on error
+      });
+  };
+
   const handleAccept = () => {
     console.log("ACCEPT PRESSED")
     fetch("http://localhost:3009/rabbitmq/match_accepted", {
@@ -149,8 +184,20 @@ const LoadingPage: React.FC = () => {
         console.error("Error during accept post:", error);
       });
     setUserAccepted(true);
+
     if (matchAccepted) {
-      navigate('/collaboration-page')
+      getCollabRoomId()
+        .then((roomId) => {
+          console.log("Room ID after fetching:", roomId); // Log the room ID
+          if (roomId) {
+            navigate(`/collaboration-page/room_id/${roomId}`); // Use the room ID for navigation
+          } else {
+            console.error("No room ID returned"); // Handle case where no room ID was returned
+          }
+        })
+        .catch((error) => {
+          console.error("Error getting collab room:", error); // Handle any errors that occurred
+        });
     }
   }
 
@@ -240,7 +287,7 @@ const LoadingPage: React.FC = () => {
               content="Match has accepted collaboration..."
               style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }} // Center the loader
             />
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', position: 'relative', zIndex: 2, marginTop: '200px'}} >
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', position: 'relative', zIndex: 2, marginTop: '200px' }} >
               <Button negative size="large" onClick={handleDecline}>
                 Decline
               </Button>

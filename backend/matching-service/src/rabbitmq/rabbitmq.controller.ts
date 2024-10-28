@@ -4,6 +4,10 @@ import { EnterQueueDto } from 'src/dto/EnterQueue.dto';
 import { map, Observable, Subject, interval } from 'rxjs';
 import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
 import { AcceptMatchDto } from 'src/dto/AcceptMatch.dto';
+import { get } from 'http';
+import { CollabRoomDto } from 'src/dto/CollabRoom.dto';
+import { DeleteRoomDto } from 'src/dto/DeleteRoom.dto';
+import { ValidateRoomDto } from 'src/dto/ValidateRoom.dto';
 
 @Controller('rabbitmq')
 export class RabbitMQController {
@@ -35,6 +39,28 @@ export class RabbitMQController {
     this.rabbitMQService.handleMatchAccept(acceptMatchDto);
     return { status: 'Processing accept' };
   }
+
+  @Post('collab_room')
+  handleCollabRoom(@Body() collabRoomDto: CollabRoomDto) {
+    console.log("Collab room endpoint reached");
+    const room_id = this.rabbitMQService.handleCollabRoom(collabRoomDto);
+    return { room_id: room_id }
+  }
+
+  @Post('validate_room')
+  handleValidateRoom(@Body() validateRoomDto: ValidateRoomDto) {
+    console.log("Validate room endpoint reached");
+    const status = this.rabbitMQService.handleValidateRoom(validateRoomDto);
+    return { room_status: status }
+  }
+
+  @Post('delete_room')
+  handleDeleteRoom(@Body() deleteRoomDto: DeleteRoomDto) {
+    console.log("Delete room endpoint reached");
+    this.rabbitMQService.handleDeleteRoom(deleteRoomDto);
+    return { status: 'Processing deletion' };
+  }
+
 
   @Sse(':userEmail')
   sse(@Param('userEmail') userEmail: string): Observable<any> {
