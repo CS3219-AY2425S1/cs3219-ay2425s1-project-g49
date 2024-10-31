@@ -362,7 +362,7 @@ const LoadingPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+    <div className="flex flex-col items-center justify-center h-screen bg-[#121212] text-white">
       {conditionalRender()}
     </div>
   );

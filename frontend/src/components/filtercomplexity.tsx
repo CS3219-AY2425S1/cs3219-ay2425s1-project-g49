@@ -13,7 +13,7 @@ const FilterComplexity: React.FC<FilterComplexityProps> = ({ complexity, setComp
     <select
       value={complexity}
       onChange={(e) => setComplexity(e.target.value)}
-      className="border rounded-md p-2 text-sm dark:bg-gray-700 dark:text-white relative w-1/6"
+      className="border rounded-md p-2 text-sm dark:bg-[#1E1E1E] dark:text-white relative w-1/6"
     >
       <option value="">All Complexities</option>
       {uniqueComplexities.map((complexityOption) => (

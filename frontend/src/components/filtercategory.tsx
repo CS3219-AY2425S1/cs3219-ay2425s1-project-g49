@@ -16,7 +16,7 @@ const FilterCategories: React.FC<FilterCategoriesProps> = ({ category, setCatego
     <select
       value={category}
       onChange={(e) => setCategory(e.target.value)}
-      className="border rounded-md p-2 text-sm dark:bg-gray-700 dark:text-white relative w-1/6"
+      className="border rounded-md p-2 text-sm dark:bg-[#1E1E1E] dark:text-white relative w-1/6"
     >
       <option value="">All Categories</option>
       {uniqueCategories.map((categoryOption) => (

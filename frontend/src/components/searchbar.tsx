@@ -13,7 +13,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
         placeholder="Search by title"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="border rounded-md p-2 text-sm dark:bg-gray-700 dark:text-white pl-10 pr-10 w-full"
+        className="border rounded-md p-2 text-white text-sm dark:bg-[#1E1E1E] dark:text-white pl-10 pr-10 w-full"
       />
       <img
         src="search-icon.png"

@@ -78,9 +78,9 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
   };
 
   return (
-    <div className="bg-gray-800 text-white">
+    <div className="bg-[#1E1E1E] text-white">
       <table className="min-w-full table-auto">
-        <thead className="bg-gray-700">
+        <thead className="bg-[#1D1D1D]">
           <tr>
             <th className="border px-4 py-2">ID</th>
             <th className="border px-4 py-2">Title</th>
@@ -91,7 +91,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
             <th className="border px-4 py-2">Actions</th>
           </tr>
         </thead>
-        <tbody className="bg-gray-800">
+        <tbody className="bg-[#1E1E1E]">
           {filteredQuestions.map((question) => (
             <tr key={question.id}>
               <td className="border px-4 py-2">{question.id}</td>
