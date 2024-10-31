@@ -74,44 +74,61 @@ export default function MatchingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900">
-            <div className="flex items-center justify-between pr-4">
-                <h1 className="text-left text-3xl font-bold pt-4 pb-4 pl-4 pr-8">PeerPrep</h1>
-                <Button icon circular className="flex items-center px-4" color="red" onClick={logout}>
-                    <Icon name="sign-out" />
-                    <span className="ml-2">Logout</span>
-                </Button>
-            </div>
-            <div className="grid grid-cols-4 h-screen items-start">
-                <div className="mx-4 min-h-[85vh] bg-gray-800 outline outline-1 outline-gray-500 col-span-3 rounded-lg shadow"></div>
-                <div className="mx-4 min-h-[55vh] bg-gray-800 text-white col-span-1 rounded-lg shadow flex flex-col outline outline-1 outline-gray-500">
-                    <div className="flex flex-col px-4 py-2">
-                        <label className="text-sm my-1 font-semibold text-left"> Select Topic</label>
-                        <select className="bg-gray-800 outline outline-1 outline-gray-500 my-1 h-10 rounded-lg" value={selectedTopic}
-                        onChange={(e) => setSelectedTopic(e.target.value)}>
-                            {topic.map((t) => (<option value={t}> {t} </option>))}
-                        </select>
-                    </div>
-                    <div className="flex flex-col px-4 py-2">
-                        <label className="text-sm my-1 font-semibold text-left"> Select Difficulty</label>
-                        <select className="bg-gray-800 outline outline-1 outline-gray-500 my-1 h-10 rounded-lg" value={selectedDificulty}
-                        onChange={(e) => setSelectedDifficulty(e.target.value)}>
-                            {difficulty.map((level) => <option value={level}> {level} </option>)}
-                        </select>
-                    </div>
-                    <div className="flex flex-col px-4 py-2">
-                        <label className="text-sm my-1 font-semibold text-left"> Select Language</label>
-                        <select className="bg-gray-800 outline outline-1 outline-gray-500 my-1 h-10 rounded-lg" value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}>
-                            {lang.map((l) => <option value={l}> {l} </option>)}
-                        </select>
-                    </div>
-                    <div className="flex flex-col justify-center px-4 py-4">
-                        <hr className="my-2" />
-                        <button className="bg-white h-12 rounded-lg text-center text-black font-semibold" onClick={handleSubmit}>Find a Peer</button>
-                    </div>
-                </div>
-            </div>
+    <div className="min-h-screen bg-[#121212] text-white">
+    <div className="flex items-center justify-between pr-4">
+        <h1 className="text-left text-3xl font-bold pt-4 pb-4 pl-4 pr-8">PeerPrep</h1>
+        <Button icon circular className="flex items-center px-4" color="red" onClick={logout}>
+        <Icon name="sign-out" />
+        <span className="ml-2">Logout</span>
+        </Button>
+    </div>
+    <div className="grid grid-cols-4 h-screen items-start">
+        <div className="mx-4 min-h-[85vh] bg-[#1E1E1E] outline outline-1 outline-[#4B4B4B] col-span-3 rounded-lg shadow-md"></div>
+        <div className="mx-4 min-h-[55vh] bg-[#1E1E1E] text-white col-span-1 rounded-lg shadow-md flex flex-col outline outline-1 outline-[#4B4B4B]">
+        <div className="flex flex-col px-4 py-2">
+            <label className="text-sm my-1 font-semibold text-left">Select Topic</label>
+            <select
+            className="bg-[#2A2A2A] outline outline-1 outline-[#4B4B4B] my-1 h-10 rounded-lg text-white"
+            value={selectedTopic}
+            onChange={(e) => setSelectedTopic(e.target.value)}
+            >
+            {topic.map((t) => (
+                <option key={t} value={t} className="bg-[#2A2A2A]">{t}</option>
+            ))}
+            </select>
         </div>
+        <div className="flex flex-col px-4 py-2">
+            <label className="text-sm my-1 font-semibold text-left">Select Difficulty</label>
+            <select
+            className="bg-[#2A2A2A] outline outline-1 outline-[#4B4B4B] my-1 h-10 rounded-lg text-white"
+            value={selectedDificulty}
+            onChange={(e) => setSelectedDifficulty(e.target.value)}
+            >
+            {difficulty.map((level) => (
+                <option key={level} value={level} className="bg-[#2A2A2A]">{level}</option>
+            ))}
+            </select>
+        </div>
+        <div className="flex flex-col px-4 py-2">
+            <label className="text-sm my-1 font-semibold text-left">Select Language</label>
+            <select
+            className="bg-[#2A2A2A] outline outline-1 outline-[#4B4B4B] my-1 h-10 rounded-lg text-white"
+            value={selectedLanguage}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            >
+            {lang.map((l) => (
+                <option key={l} value={l} className="bg-[#2A2A2A]">{l}</option>
+            ))}
+            </select>
+        </div>
+        <div className="flex flex-col justify-center px-4 py-4">
+            <hr className="my-2 border-[#4B4B4B]" />
+            <button className="bg-[#3C3C3C] h-12 rounded-lg text-center text-white font-semibold hover:bg-[#4B4B4B] transition duration-200" onClick={handleSubmit}>
+            Find a Peer
+            </button>
+        </div>
+        </div>
+    </div>
+    </div>
     )
 }

@@ -44,17 +44,22 @@ export default function ProfilePage() {
 	}
 
 	return (
-		<div className="flex flex-col items-center justify-center h-screen">
-			<div className="bg-slate-900 p-20 rounded-3xl">
-				<h1>My profile</h1>
-				{decodedToken && (
-                    <>
-                        <h2>{decodedToken.email}</h2>
-                        <h2>{decodedToken.name}</h2>
-                    </>
-                )}
-				<button className="rounded-full mt-5 p-2 bg-slate-700" onClick={logout}>Logout</button>
-			</div>
-		</div>
+	<div className="bg-[#121212] flex flex-col items-center justify-center h-screen">
+	<div className="bg-[#1E1E1E] p-10 rounded-3xl shadow-lg w-80">
+		<h1 className="text-3xl font-bold text-white mb-4">My Profile</h1>
+		{decodedToken && (
+		<>
+			<h2 className="text-lg text-white mb-2">{decodedToken.email}</h2>
+			<h2 className="text-lg text-white mb-4">{decodedToken.name}</h2>
+		</>
+		)}
+		<button
+		className="rounded-full mt-5 p-2 bg-[#3C3C3C] text-white hover:bg-[#4B4B4B] transition duration-200"
+		onClick={logout}
+		>
+		Logout
+		</button>
+	</div>
+	</div>
 	)
 }

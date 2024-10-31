@@ -35,22 +35,24 @@ const QuestionServicePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gray-900 text-white">
-      <h1 className="text-2xl font-bold text-left mb-6">Peer Prep</h1>
-      <div className="flex justify-start items-center space-x-2 mb-4 text-sm">
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <FilterCategories
-          category={categoryFilter}
-          setCategory={setCategoryFilter}
-          questions={questions}
-        />
-        <FilterComplexity
-          complexity={complexityFilter}
-          setComplexity={setComplexityFilter}
-          questions={questions}
-        />
-        <UploadFile setQuestions={setQuestions} />
-      </div>
+  <div className="bg-[#121212] min-h-screen p-4 text-white">
+    <h1 className="text-3xl font-bold text-left mb-6">Peer Prep</h1>
+    <div className="flex justify-start items-center space-x-2 mb-4 text-sm">
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <FilterCategories
+        category={categoryFilter}
+        setCategory={setCategoryFilter}
+        questions={questions}
+      />
+      <FilterComplexity
+        complexity={complexityFilter}
+        setComplexity={setComplexityFilter}
+        questions={questions}
+      />
+      <UploadFile setQuestions={setQuestions} />
+    </div>
+    
+    <div className="bg-[#1E1E1E] rounded-md shadow-md p-4">
       <QuestionTable
         searchTerm={searchTerm}
         category={categoryFilter}
@@ -59,6 +61,7 @@ const QuestionServicePage: React.FC = () => {
         setQuestions={setQuestions}
       />
     </div>
+  </div>
   );
 };
 

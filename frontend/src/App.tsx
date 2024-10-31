@@ -16,7 +16,7 @@ const App: React.FC = () => {
 
   return (
     <UserContextProvider>
-      <div className="App h-screen bg-gray-900 text-white">
+      <div className="bg-[#121212] App h-screen text-white">
         <Routes>
           <Route path='/' element={<LoginPage />} />
           <Route path='/login' element={<LoginPage />} />
