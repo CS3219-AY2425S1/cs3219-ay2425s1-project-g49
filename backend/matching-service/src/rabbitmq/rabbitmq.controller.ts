@@ -61,6 +61,12 @@ export class RabbitMQController {
     return { status: 'Processing deletion' };
   }
 
+  @Post('remove_user')
+  async removeUser(@Body('userEmail') userEmail: string) {
+    console.log(`Removing user: ${userEmail}`);
+    const result = await this.rabbitMQService.removeUserFromQueue(userEmail);
+    return result ? { status: 'User removed successfully' } : { status: 'User not found in queue' };
+  }
 
   @Sse(':userEmail')
   sse(@Param('userEmail') userEmail: string): Observable<any> {

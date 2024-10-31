@@ -21,7 +21,6 @@ const LoadingPage: React.FC = () => {
   const location = useLocation();
   const requestData = location.state;
 
-
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -32,6 +31,13 @@ const LoadingPage: React.FC = () => {
         return prev - 1;
       });
     }, 1000);
+
+    const disableBackButton = (event: PopStateEvent) => {
+      event.preventDefault();
+      navigate("/loading");
+    };
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", disableBackButton);
 
     const jwtToken = localStorage.getItem("access_token");
     let decodedToken: CustomJwtPayload | null = null;
@@ -123,6 +129,32 @@ const LoadingPage: React.FC = () => {
       });
   };
 
+  const handleExit = () => {
+    removeFromQueue().then(() => {
+      navigate("/matching-page");
+    });
+  };
+
+  const jwtToken = localStorage.getItem("access_token");
+  let decodedToken: CustomJwtPayload | null = null;
+  if (jwtToken) {
+    decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
+  }
+  
+  const removeFromQueue = async () => {
+    const response = await fetch("http://localhost:3009/rabbitmq/remove_user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userEmail: decodedToken?.email }),
+    });
+    if (!response.ok) {
+      console.error("Failed to remove user from queue");
+    } else {
+      console.log("User successfully removed from queue");
+    }
+  };
 
   const handleDecline = () => {
     console.log("DECLINE PRESSED")
@@ -205,13 +237,12 @@ const LoadingPage: React.FC = () => {
     if (!matchFound) {
       if (countdown > 0) {
         return (
-          <Loader
-            active
-            inverted
-            indeterminate
-            size="massive"
-            content={`Matching in ${countdown} seconds`}
-          />
+          <Container textAlign="center">
+            <Loader active inverted indeterminate size="massive" content={`Matching in ${countdown} seconds`}/>
+            <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "200px" }}>
+            <Button color="red" size="large" onClick={handleExit}> Cancel Search </Button>
+            </div>
+          </Container>
         );
       } else if (countdown <= 0) {
         return (

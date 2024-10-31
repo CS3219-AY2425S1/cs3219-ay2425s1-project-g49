@@ -214,7 +214,24 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-
+  async removeUserFromQueue(userEmail: string): Promise<boolean> {
+    const matchingKey = Object.keys(this.unmatchedRequests).find((key) => {
+      const req = this.unmatchedRequests[key];
+      return req.email === userEmail;
+    });
+    if (matchingKey) {
+      console.log(`Removing unmatched request for user: ${userEmail}`);
+      delete this.unmatchedRequests[matchingKey];
+      if (this.timeouts[userEmail]) {
+        clearTimeout(this.timeouts[userEmail]);
+        delete this.timeouts[userEmail];
+        console.log(`Cleared timeout for user: ${userEmail}`);
+      }
+      return true;
+    }
+    console.log(`No unmatched request found for user: ${userEmail}`);
+    return false;
+  }
 
   notifyMatchFound(userEmail: string, matchEmail: string, matchStatus: string) {
     console.log('connected users are', this.connectedUsers);
