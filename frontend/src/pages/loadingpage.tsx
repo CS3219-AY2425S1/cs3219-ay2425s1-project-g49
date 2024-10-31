@@ -273,8 +273,6 @@ const LoadingPage: React.FC = () => {
     } else if (matchFound) {
 
       if (matchDeclined) {
-        // console.log("match declined");
-        // console.log("count down is", countdown);
         return (
           <Container textAlign="center">
             <Header as="h1" size="huge" style={{ color: "white" }}>
@@ -316,9 +314,9 @@ const LoadingPage: React.FC = () => {
               indeterminate
               size="massive"
               content="Match has accepted collaboration..."
-              style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }} // Center the loader
+              style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }}
             />
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', position: 'relative', zIndex: 2, marginTop: '200px' }} >
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', position: 'relative', zIndex: 2, marginTop: '250px' }} >
               <Button negative size="large" onClick={handleDecline}>
                 Decline
               </Button>
@@ -330,8 +328,6 @@ const LoadingPage: React.FC = () => {
         );
 
       } else {
-        // console.log("match found is", matchFound);
-        // console.log("count down is", countdown);
         return (
           <Container textAlign="center">
             <Header as="h1" size="huge" style={{ color: "white" }}>
