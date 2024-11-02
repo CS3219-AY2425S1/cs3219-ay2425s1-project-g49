@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import MonacoEditor, { OnChange } from "@monaco-editor/react";
 import io, { Socket } from "socket.io-client";
+import prettier from "prettier";
+import parserBabel from "prettier/parser-babel";
 
 interface CollaborativeEditorProps {
   sessionId: string;
@@ -33,6 +35,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     setEditorContent(value || "");
     socketRef.current?.emit("edit", { sessionId, text: value });
   };
+
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
