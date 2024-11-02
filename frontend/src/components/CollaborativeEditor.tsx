@@ -14,7 +14,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   const [editorContent, setEditorContent] = useState<string>("");
   const socketRef = useRef<any>(null);
   const editorRef = useRef<any>(null);
-
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   useEffect(() => {
     socketRef.current = io("http://localhost:3008");
 
@@ -36,6 +36,16 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     socketRef.current?.emit("edit", { sessionId, text: value });
   };
 
+  const handleFormat = () => {
+    if (editorRef.current) {
+      const formatted = prettier.format(editorRef.current.getValue(), {
+        parser: "babel",
+        plugins: [parserBabel as any],
+      });
+      editorRef.current.setValue(formatted);
+      socketRef.current?.emit("edit", { sessionId, text: formatted });
+    }
+  };
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
@@ -43,9 +53,17 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
   return (
     <div>
+      <select
+        onChange={(e) => setSelectedLanguage(e.target.value)}
+        value={selectedLanguage}
+      >
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="typescript">TypeScript</option>
+      </select>
       <MonacoEditor
         height="500px"
-        language="javascript"
+        language={selectedLanguage}
         theme="vs-dark"
         value={editorContent}
         onChange={handleEditorChange}
