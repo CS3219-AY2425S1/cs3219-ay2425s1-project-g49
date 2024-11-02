@@ -18,6 +18,7 @@ services:
       - user-service
       - question-service
       - matching-service
+      - collaboration-service
       - rabbitmq
 
   user-service:

@@ -51,7 +51,8 @@ export default function CollaborationPage() {
             "Implement a function to check if a string is a palindrome."
           );
         } else {
-          console.log("Invalid room id");
+          alert("Invalid room. Room does not exist / you are not authorised for this collab room!")
+          navigate('/matching-page')
         }
       } catch (error) {
         console.error("Error during accept post:", error);
