@@ -49,8 +49,8 @@ export default function CollaborationPage() {
 
 
 
-  const deleteRoom = async () => {
-    const response = await fetch("http://localhost:3009/rabbitmq/delete_room", {
+  const endCollab = async () => {
+    const response = await fetch("http://localhost:3008/collab/end_collab", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,9 +61,9 @@ export default function CollaborationPage() {
       }),
     });
     if (!response.ok) {
-      console.error("Failed to delete toom");
+      console.error("Failed to end collab");
     } else {
-      console.log("Room successfully deleted");
+      console.log("Collab Room successfully deleted");
     }
   }
 
@@ -90,7 +90,7 @@ export default function CollaborationPage() {
           setQuestion(result)
         } else {
           alert("Failed to get questions for collab")
-          await deleteRoom();
+          await endCollab();
           navigate('/matching-page')
         }
       } catch (error) {
@@ -102,7 +102,7 @@ export default function CollaborationPage() {
     const validateRoom = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3009/rabbitmq/validate_room",
+          "http://localhost:3008/collab/validate_room",
           {
             method: "POST",
             headers: {
@@ -192,10 +192,36 @@ export default function CollaborationPage() {
       localStorage.setItem("access_token", data.jwtToken);
     }
   }
+
+  const endCollabSuccess = async () => {
+    const response = await fetch("http://localhost:3008/collab/end_collab_success", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: decodedToken?.email,
+        roomId: roomId,
+        questions: [{
+          id: question?.id,
+          title: question?.title,
+          solution: code,
+          time: new Date().toLocaleString()
+        }],
+        
+      }),
+    });
+    if (!response.ok) {
+      console.error("Failed to end collab");
+    } else {
+      console.log("Collab Room successfully deleted");
+    }
+  }
+
   const submitCode = async () => {
-    await removeQn();
-    await deleteRoom();
-    await updateUser();
+    // await removeQn();
+    await endCollabSuccess();
+    // await updateUser();
     navigate("/matching-page");
     alert("Collaboration completed")
   };

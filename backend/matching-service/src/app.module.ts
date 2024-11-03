@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
+import { MatchingModule } from './matching/matching.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [RabbitMQModule, ConfigModule.forRoot()],
+  imports: [MatchingModule, ConfigModule.forRoot()],
   controllers: [],
   providers: [],
 })

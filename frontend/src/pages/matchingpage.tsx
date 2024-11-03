@@ -58,7 +58,7 @@ export default function MatchingPage() {
         };
 
         try {
-            const response = await fetch('http://localhost:3009/rabbitmq/enter', {
+            const response = await fetch('http://localhost:3009/matching/enter', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
