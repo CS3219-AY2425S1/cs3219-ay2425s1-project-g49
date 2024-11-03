@@ -1,23 +1,44 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, isString, IsString } from 'class-validator';
+
+
+export class QuestionDto {
+  @IsNotEmpty()
+  @IsNumber()
+  id: number;
+
+  @IsNotEmpty()
+  @IsString()
+  title: string;
+
+  @IsNotEmpty()
+  @IsString()
+  solution: string;
+
+  @IsNotEmpty()
+  @IsString()
+  time: string;
+
+}
 
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
-  username: string;
+  username?: string;
 
   @IsOptional()
   @IsString()
-  email: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
-  avatarUrl: string;
+  avatarUrl?: string;
 
   @IsOptional()
   @IsString()
   displayName?: string;
 
   @IsOptional()
-  @IsString()
-  questions?: string;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  questions?: QuestionDto[];
 }

@@ -5,15 +5,33 @@ import { Button, Icon, Grid, Segment, Loader, Header } from "semantic-ui-react";
 import Editor from "@monaco-editor/react";
 import CollaborativeEditor from "../components/CollaborativeEditor";
 
+
+interface tokenQuestions {
+  id: number;
+  title: string;
+  solution: string;
+  time: string;
+}
+
 interface CustomJwtPayload extends JwtPayload {
   email?: string;
   name?: string;
+  questions?: tokenQuestions[];
 }
+
+interface Question {
+  id: string;
+  title: string;
+  question: string;
+  categories: string;
+  complexity: string;
+}
+
 
 export default function CollaborationPage() {
   const [isValidRoom, setIsValidRoom] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [question, setQuestion] = useState<string>(""); // Sample question data
+  const [question, setQuestion] = useState<Question | null>(null); // Sample question data
   const [code, setCode] = useState<string>("// Start Coding Here");
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,13 +39,67 @@ export default function CollaborationPage() {
   const { roomId } = useParams();
   const editorRef = useRef<any>(null);
 
+
+  const jwtToken = localStorage.getItem("access_token");
+  let decodedToken: CustomJwtPayload | null = null;
+
+  if (jwtToken) {
+    decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
+  }
+
+
+
+  const deleteRoom = async () => {
+    const response = await fetch("http://localhost:3009/rabbitmq/delete_room", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: decodedToken?.email,
+        roomId: roomId
+      }),
+    });
+    if (!response.ok) {
+      console.error("Failed to delete toom");
+    } else {
+      console.log("Room successfully deleted");
+    }
+  }
+
+
   useEffect(() => {
-    const validateRoom = async () => {
-      const jwtToken = localStorage.getItem("access_token");
-      let decodedToken: CustomJwtPayload | null = null;
-      if (jwtToken) {
-        decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
+    const getCollabQuestion = async () => {
+      try {
+        const solvedQuestions = decodedToken?.questions || [];
+        const solvedQuestionIds = solvedQuestions.map(q => q.id);
+        const response = await fetch("http://localhost:3002/questions/collab", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            categories: requestData.categories,
+            complexity: requestData.complexity,
+            roomId: roomId,
+            solvedQuestionIds: solvedQuestionIds
+          }),
+        })
+        const result = await response.json();
+        if (result.status) {
+          setQuestion(result)
+        } else {
+          alert("Failed to get questions for collab")
+          await deleteRoom();
+          navigate('/matching-page')
+        }
+      } catch (error) {
+        console.error("Error during collab Room post:", error);
+        return null;
       }
+    }
+
+    const validateRoom = async () => {
       try {
         const response = await fetch(
           "http://localhost:3009/rabbitmq/validate_room",
@@ -45,11 +117,7 @@ export default function CollaborationPage() {
         const result = await response.json();
         if (result.room_status) {
           setIsValidRoom(true);
-          // Placed dummy question for now,
-          // Need to fetch random question from question service based on match parameters
-          setQuestion(
-            "Implement a function to check if a string is a palindrome."
-          );
+          await getCollabQuestion();
         } else {
           alert("Invalid room. Room does not exist / you are not authorised for this collab room!")
           navigate('/matching-page')
@@ -84,8 +152,52 @@ export default function CollaborationPage() {
     </div>;
   }
 
-  const submitCode = () => {
+
+  const removeQn = async () => {
+    const response = await fetch("http://localhost:3002/questions/delete_collabQn", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ roomId: roomId }),
+    });
+    if (!response.ok) {
+      console.error("Failed to remove user from queue");
+    } else {
+      console.log("User successfully removed from queue");
+    }
+  }
+
+
+  const updateUser = async () => {
+    const response = await fetch(`http://localhost:3001/users/${decodedToken?.email}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        questions: [{
+          id: question?.id,
+          title: question?.title,
+          solution: code,
+          time: new Date().toLocaleString()
+        }]
+      }),
+    });
+    if (!response.ok) {
+      console.error("Failed to update user");
+    } else {
+      console.log("User successfully updated");
+      const data = await response.json()
+      localStorage.setItem("access_token", data.jwtToken);
+    }
+  }
+  const submitCode = async () => {
+    await removeQn();
+    await deleteRoom();
+    await updateUser();
     navigate("/matching-page");
+    alert("Collaboration completed")
   };
 
   const handleEditorChange = (value: string | undefined) => {
@@ -133,9 +245,9 @@ export default function CollaborationPage() {
           <Grid.Column width={6}>
             <Segment style={{ backgroundColor: "#1E1E1E", color: "#FFFFFF" }}>
               <Header as="h2" style={{ color: "#FFFFFF" }}>
-                Coding Question
+                {question?.title}
               </Header>
-              <p>{question}</p>
+              <p>{question?.question}</p>
             </Segment>
           </Grid.Column>
           <Grid.Column width={10}>
@@ -152,7 +264,7 @@ export default function CollaborationPage() {
                 }}
               />
             </Segment> */}
-            <CollaborativeEditor sessionId={roomId!} />
+            <CollaborativeEditor sessionId={roomId!} onCodeChange={handleEditorChange} />
           </Grid.Column>
         </Grid.Row>
       </Grid>

@@ -6,10 +6,12 @@ import parserBabel from "prettier/parser-babel";
 
 interface CollaborativeEditorProps {
   sessionId: string;
+  onCodeChange: (code: string) => void;
 }
 
 const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   sessionId,
+  onCodeChange,
 }) => {
   const [editorContent, setEditorContent] = useState<string>("");
   const socketRef = useRef<any>(null);
@@ -33,6 +35,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
   const handleEditorChange: OnChange = (value) => {
     setEditorContent(value || "");
+    onCodeChange(value || "");
     socketRef.current?.emit("edit", { sessionId, text: value });
   };
 

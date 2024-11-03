@@ -79,7 +79,7 @@ const LoadingPage: React.FC = () => {
               .then((roomId) => {
                 console.log("Room ID after fetching:", roomId); // Log the room ID
                 if (roomId) {
-                  navigate(`/collaboration-page/room_id/${roomId}`); // Use the room ID for navigation
+                  navigate(`/collaboration-page/room_id/${roomId}`,  { state: requestData }); // Use the room ID for navigation
                 } else {
                   console.error("No room ID returned"); // Handle case where no room ID was returned
                 }
@@ -222,7 +222,7 @@ const LoadingPage: React.FC = () => {
         .then((roomId) => {
           console.log("Room ID after fetching:", roomId); // Log the room ID
           if (roomId) {
-            navigate(`/collaboration-page/room_id/${roomId}`); // Use the room ID for navigation
+            navigate(`/collaboration-page/room_id/${roomId}`,  { state: requestData }); // Use the room ID for navigation
           } else {
             console.error("No room ID returned"); // Handle case where no room ID was returned
           }

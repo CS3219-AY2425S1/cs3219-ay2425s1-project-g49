@@ -57,8 +57,8 @@ export class RabbitMQController {
   @Post('delete_room')
   handleDeleteRoom(@Body() deleteRoomDto: DeleteRoomDto) {
     console.log("Delete room endpoint reached");
-    this.rabbitMQService.handleDeleteRoom(deleteRoomDto);
-    return { status: 'Processing deletion' };
+    const status = this.rabbitMQService.handleDeleteRoom(deleteRoomDto);
+    return { status: status };
   }
 
   @Post('remove_user')

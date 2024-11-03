@@ -177,15 +177,20 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   }
 
   handleDeleteRoom(deleteRoomDto: DeleteRoomDto) {
-    const { emailA, emailB, roomId } = deleteRoomDto;
-    if( this.userRooms[emailA]) {
-      delete this.userRooms[emailA];
+    const { email, roomId } = deleteRoomDto;
+    if (this.userRooms[email]) {
+      delete this.userRooms[email];
     }
-    if( this.userRooms[emailB]) {
-      delete this.userRooms[emailB];
-    }
+
     if (this.collabRooms[roomId]) {
-      delete this.collabRooms[roomId]
+      const users = this.collabRooms[roomId];
+      const userA = users[0];
+      const userB = users[1];
+      if (!this.userRooms[userA] && !this.userRooms[userB]) {
+        delete this.collabRooms[roomId];
+        console.log("Room deleted");
+        return true;
+      }
     }
   }
 

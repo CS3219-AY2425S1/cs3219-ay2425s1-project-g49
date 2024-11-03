@@ -16,7 +16,7 @@ import { UpdateUserDto } from '../dto/UpdateUser.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto) {
@@ -46,9 +46,11 @@ export class UsersController {
     @Param('email') email: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const updateUser = await this.usersService.updateUsers(email, updateUserDto);
-    if (!updateUser) throw new HttpException('User Not Found', 404);
-    return updateUser;
+    console.log("user update enpoint reached", updateUserDto)
+    const updateUserToken = await this.usersService.updateUsers(email, updateUserDto);
+    // console.log(updateUser);
+    // if (!updateUser) throw new HttpException('User Not Found', 404);
+    return updateUserToken;
   }
 
   @Delete(':email')

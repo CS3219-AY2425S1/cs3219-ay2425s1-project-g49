@@ -1,6 +1,13 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 
+
+export interface Question {
+  id: number;
+  solution: string;
+  time: string;
+}
+
 @Schema()
 export class User {
   @Prop({ required: true })
@@ -16,7 +23,7 @@ export class User {
   displayName?: string;
 
   @Prop({ required: false })
-  questions?: number[];
+  questions?: Question[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

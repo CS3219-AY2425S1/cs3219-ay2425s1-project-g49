@@ -14,10 +14,8 @@ export class AuthService {
     this.clientID = configService.get<string>('GOOGLE_CLIENT_ID');
     this.clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
     this.oAuth2Client = new OAuth2Client(this.clientID, this.clientSecret, 'http://localhost:3000');
-    
+
   }
-
-
 
   async verifyJWTToken(jwtToken: string) {
     const loginTicket = await this.oAuth2Client.verifyIdToken({
@@ -26,7 +24,7 @@ export class AuthService {
     })
     const payload = loginTicket.getPayload();
     return payload
-   
+
   }
 
   async handleUserLogin(jwtToken: string) {
@@ -39,21 +37,30 @@ export class AuthService {
     }
     let user = await this.usersService.getUserByEmail(payload['email']);
     if (user) {
-      console.log("DUPLICATE USER IGNORED");
-      // if (user == userData) {
-      //   console.log("DUPLICATE USER IGNORED");
-      // } else {
-      //   const newUser = await this.usersService.updateUsers(userData.email, userData);
-      // }
+      console.log("Existing user");
+
+      const tokenData = { email: user['email'], name: user['username'], avatarUrl: user['avatarUrl'], questions: user['questions'] }
+      console.log(tokenData);
+      const accessToken = await this.jwtService.signAsync(tokenData, { expiresIn: "2h" });
+      return { jwtToken: accessToken };
     } else {
       const user = await this.usersService.createUser(userData);
+      const tokenData = { email: payload['email'], name: payload['name'], avatarUrl: payload['picture'] }
+      const accessToken = await this.jwtService.signAsync(tokenData, { expiresIn: "2h" });
       console.log("User created")
+      return { jwtToken: accessToken };
     }
-
-    const tokenData = { sub: payload['sub'], email: payload['email'], name: payload['name'], avatarUrl: payload['picture'] }
-    const accessToken = await this.jwtService.signAsync(tokenData, { expiresIn: "2h" });
-    // console.log("THIS IS THE TOKEN ", accessToken);
-    return {jwtToken: accessToken};
   };
+
+  async updateToken(email: string) {
+    let user = await this.usersService.getUserByEmail(email);
+    if (user) {
+      console.log("Existing user");
+      const tokenData = { email: user['email'], name: user['username'], avatarUrl: user['avatarUrl'], questions: user['questions'] }
+      console.log(tokenData);
+      const accessToken = await this.jwtService.signAsync(tokenData, { expiresIn: "2h" });
+      return { jwtToken: accessToken };
+    }
+  }
 
 }

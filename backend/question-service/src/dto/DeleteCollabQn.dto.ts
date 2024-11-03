@@ -4,11 +4,7 @@ import {
 } from 'class-validator';
 
 
-export class DeleteRoomDto {
-  @IsNotEmpty()
-  @IsString()
-  email: string;
-
+export class DeleteCollabQnDto {
   @IsNotEmpty()
   @IsString()
   roomId: string;
