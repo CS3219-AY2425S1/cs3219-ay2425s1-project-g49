@@ -29,6 +29,9 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
   private readonly matchFoundQueue = 'match_found';
   private readonly matchFoundRoutingKey = this.matchFoundQueue;
 
+  private readonly matchDeclinedQueue = 'match_declined';
+  private readonly matchDeclinedRoutingKey = this.matchDeclinedQueue;
+
   private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
   // private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
   private connection: amqp.Connection;
@@ -79,21 +82,36 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
                   return;
                 }
 
-                channel.bindQueue(this.matchingQueue, this.matchingExchange, this.matchingRoutingKey, {}, (bindErr) => {
-                  if (bindErr) {
-                    console.error('Failed to bind queue to exchange:', bindErr);
+                channel.assertQueue(this.matchDeclinedQueue, { durable: false }, (queueErr) => {
+                  if (queueErr) {
+                    console.error('Failed to assert queue:', queueErr);
                     return;
                   }
 
-                  console.log(`Queue ${this.matchingQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchingRoutingKey}`);
-
-                  channel.bindQueue(this.matchFoundQueue, this.matchingExchange, this.matchFoundQueue, {}, (bindErr) => {
+                  channel.bindQueue(this.matchingQueue, this.matchingExchange, this.matchingRoutingKey, {}, (bindErr) => {
                     if (bindErr) {
                       console.error('Failed to bind queue to exchange:', bindErr);
                       return;
                     }
-                    console.log(`Queue ${this.matchFoundQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchFoundRoutingKey}`);
-                    resolve();
+
+                    console.log(`Queue ${this.matchingQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchingRoutingKey}`);
+
+                    channel.bindQueue(this.matchFoundQueue, this.matchingExchange, this.matchFoundRoutingKey, {}, (bindErr) => {
+                      if (bindErr) {
+                        console.error('Failed to bind queue to exchange:', bindErr);
+                        return;
+                      }
+                      console.log(`Queue ${this.matchFoundQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchFoundRoutingKey}`);
+
+                      channel.bindQueue(this.matchDeclinedQueue, this.matchingExchange, this.matchDeclinedRoutingKey, {}, (bindErr) => {
+                        if (bindErr) {
+                          console.error('Failed to bind queue to exchange:', bindErr);
+                          return;
+                        }
+                        console.log(`Queue ${this.matchDeclinedQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchDeclinedRoutingKey}`);
+                        resolve();
+                      });
+                    });
                   });
                 });
               });
@@ -170,13 +188,13 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
   }
 
   private matchUser(userRequest: EnterQueueDto): void {
-    const { email, categories, complexity, language } = userRequest;
+    const { email, categories, complexity, language, solvedQuestionIds } = userRequest;
     const matchingKey = `${categories}-${complexity}-${language}`;
     if (this.unmatchedRequests[matchingKey]) {
       const matchedUser = this.unmatchedRequests[matchingKey];
       console.log(`Match found between ${email} and ${matchedUser.email}`);
       delete this.unmatchedRequests[matchingKey];
-      this.notifyMatchFound(email, matchedUser.email, "Perfect");
+      this.notifyMatchFound(email, matchedUser.email, categories, complexity, solvedQuestionIds, matchedUser.solvedQuestionIds, "Perfect");
     } else if (
       Object.values(this.unmatchedRequests).find(
         (req) => req.categories === categories,
@@ -190,7 +208,7 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
       );
       const partialMatchingKey = `${matchedUser.categories}-${matchedUser.complexity}-${matchedUser.language}`;
       delete this.unmatchedRequests[partialMatchingKey];
-      this.notifyMatchFound(email, matchedUser.email, "Partial");
+      this.notifyMatchFound(email, matchedUser.email, categories, complexity, solvedQuestionIds, matchedUser.solvedQuestionIds, "Partial");
     } else {
       this.unmatchedRequests[matchingKey] = userRequest;
       console.log(`No match found for user ${email}, waiting for a match...`);
@@ -217,9 +235,16 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
     return false;
   }
 
-  notifyMatchFound(userEmail: string, matchEmail: string, matchStatus: string,) {
+  notifyMatchFound(userEmail: string, matchEmail: string, categories: string, complexity: string, userSolvedQns: number[], matchSolvedQns: number[], matchStatus: string,) {
     console.log('connected users are', this.connectedUsers);
-    this.channel.publish(this.matchingExchange, this.matchFoundRoutingKey, Buffer.from(JSON.stringify({ userEmail: userEmail, matchEmail: matchEmail })));
+    this.channel.publish(this.matchingExchange, this.matchFoundRoutingKey, Buffer.from(JSON.stringify({
+      userEmail: userEmail,
+      matchEmail: matchEmail,
+      categories: categories,
+      complexity: complexity,
+      userSolvedQns: userSolvedQns,
+      matchSolvedQns: matchSolvedQns
+    })));
 
     const time = new Date().toISOString();
     const userData = {
@@ -259,6 +284,9 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
 
   handleMatchDecline(declineMatchDto: DeclineMatchDto) {
     const { email } = declineMatchDto;
+    this.channel.publish(this.matchingExchange, this.matchDeclinedRoutingKey, Buffer.from(JSON.stringify({
+      email: email,
+    })));
     const declineData = {
       event: "Decline",
       userEmail: email,   // Email address to send decline event to

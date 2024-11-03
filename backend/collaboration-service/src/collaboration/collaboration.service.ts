@@ -4,10 +4,17 @@ import * as amqp from 'amqplib/callback_api.js';
 import { ValidateRoomDto } from 'src/dto/ValidateRoom.dto';
 import { EndCollabDto } from 'src/dto/EndCollab.dto';
 import { CollabRoomDto } from 'src/dto/CollabRoom.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Question } from 'src/schemas/Question.schema';
+import { Model } from 'mongoose';
+import { User } from 'src/schemas/User.Schema';
+
+
 
 
 @Injectable()
 export class CollaborationService implements OnModuleInit, OnModuleDestroy {
+	constructor(@InjectModel(Question.name) private questionModel: Model<Question>, @InjectModel(User.name) private userModel: Model<User>) { }
 	private readonly collabRooms: Record<string, any[]> = {};
 	private readonly userRooms: Record<string, string> = {};
 	private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
@@ -19,6 +26,13 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 
 	private readonly matchFoundQueue = 'match_found';
 	private readonly matchFoundRoutingKey = this.matchFoundQueue;
+
+	private readonly matchDeclinedQueue = 'match_declined';
+	private readonly matchDeclinedRoutingKey = this.matchDeclinedQueue;
+
+	private readonly collabQuestions: Record<string, any> = {};
+	private roomLocks: Set<string> = new Set();
+
 
 	async onModuleInit() {
 		await this.connect();
@@ -57,14 +71,29 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 								return;
 							}
 
-							channel.bindQueue(this.matchFoundQueue, this.matchingExchange, this.matchFoundRoutingKey, {}, (bindErr) => {
-								if (bindErr) {
-									console.error('Failed to bind queue to exchange:', bindErr);
+							channel.assertQueue(this.matchDeclinedQueue, { durable: false }, (queueErr) => {
+								if (queueErr) {
+									console.error('Failed to assert queue:', queueErr);
 									return;
 								}
 
-								console.log(`Queue ${this.matchFoundQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchFoundRoutingKey}`);
-								resolve();
+								channel.bindQueue(this.matchFoundQueue, this.matchingExchange, this.matchFoundRoutingKey, {}, (bindErr) => {
+									if (bindErr) {
+										console.error('Failed to bind queue to exchange:', bindErr);
+										return;
+									}
+
+									console.log(`Queue ${this.matchFoundQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchFoundRoutingKey}`);
+
+									channel.bindQueue(this.matchDeclinedQueue, this.matchingExchange, this.matchDeclinedRoutingKey, {}, (bindErr) => {
+										if (bindErr) {
+											console.error('Failed to bind queue to exchange:', bindErr);
+											return;
+										}
+										console.log(`Queue ${this.matchDeclinedQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchDeclinedRoutingKey}`);
+										resolve();
+									});
+								});
 							});
 						});
 					});
@@ -90,9 +119,21 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 			this.channel.consume(this.matchFoundQueue, (msg) => {
 				console.log('parsed to', JSON.parse(msg.content.toString()));
 				if (msg !== null) {
-					const { userEmail, matchEmail } = JSON.parse(msg.content.toString());
+					const { userEmail, matchEmail, categories, complexity, userSolvedQns, matchSolvedQns } = JSON.parse(msg.content.toString());
 					this.channel.ack(msg);
-					this.generateCollabRoom(userEmail, matchEmail)
+					this.generateCollabRoom(userEmail, matchEmail, categories, complexity, userSolvedQns, matchSolvedQns);
+
+				} else {
+					console.log('Received a null user, skipping.');
+				}
+			});
+			this.channel.consume(this.matchDeclinedQueue, (msg) => {
+				console.log('parsed to', JSON.parse(msg.content.toString()));
+				if (msg !== null) {
+					const { email } = JSON.parse(msg.content.toString());
+					this.channel.ack(msg);
+					this.cleanupCollabRoom(email);
+
 				} else {
 					console.log('Received a null user, skipping.');
 				}
@@ -102,6 +143,32 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
+
+	cleanupCollabRoom(email: string) {
+		if (this.userRooms[email]) {
+			const roomId = this.userRooms[email];
+			const [userEmail, matchEmail] = this.collabRooms[roomId];
+			if (this.userRooms[userEmail]) {
+				delete this.userRooms[userEmail]
+			}
+			if (this.userRooms[matchEmail]) {
+				delete this.userRooms[matchEmail]
+			}
+			if (this.collabQuestions[roomId]) {
+				delete this.collabQuestions[roomId]
+			}
+			if (this.collabRooms[roomId]) {
+				delete this.collabRooms[roomId]
+			}
+			delete this.userRooms[email];
+
+			console.log("cleanup collab room successful")
+			console.log(this.userRooms)
+			console.log(this.collabRooms)
+			console.log(this.collabQuestions)
+
+		}
+	}
 
 	handleEndCollab(endCollabDto: EndCollabDto) {
 		const { email, roomId } = endCollabDto;
@@ -139,15 +206,39 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	generateCollabRoom(userEmail: string, matchEmail: string) {
+	async generateCollabRoom(userEmail: string, matchEmail: string, categories: string, complexity: string, userSolvedQns: number[], matchSolvedQns: number[]) {
+
 		const existingRoomId = this.userRooms[userEmail];
 		const matchUserRoomId = this.userRooms[matchEmail];
 
 		if (!existingRoomId && !matchUserRoomId) {
-			const roomID = uuidv4();
-			this.collabRooms[roomID] = [userEmail, matchEmail];
-			this.userRooms[userEmail] = roomID;
-			this.userRooms[matchEmail] = roomID;
+			const roomId = uuidv4();
+			this.collabRooms[roomId] = [userEmail, matchEmail];
+			this.userRooms[userEmail] = roomId;
+			this.userRooms[matchEmail] = roomId;
+
+			const availableQuestions = await this.questionModel.find({
+				categories: { $regex: new RegExp(categories, 'i') },
+				complexity: complexity,
+				id: { $nin: userSolvedQns }
+			});
+			const selectedQuestion = availableQuestions.length > 0 ? availableQuestions[0] : null;
+			// console.log(categories)
+			// console.log(complexity)
+			// console.log(availableQuestions);
+			this.collabQuestions[roomId] = selectedQuestion;
+			console.log(this.collabQuestions[roomId]);
+		}
+	}
+
+
+	getCollabQuestion(roomId: string) {
+		if (this.collabQuestions[roomId]) {
+			console.log("success")
+			return this.collabQuestions[roomId];
+		} else {
+			console.log("fail")
+			return null;
 		}
 	}
 }

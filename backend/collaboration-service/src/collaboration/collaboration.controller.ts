@@ -28,4 +28,26 @@ export class CollaborationController {
 		const status = this.collaborationService.handleEndCollab(endCollabDto);
 		return { status: status };
 	}
+
+	@Get('collab_qn/:room_id')
+	handleGetCollabQn(@Param('room_id') room_id: string) {
+		console.log(room_id)
+		console.log("Get collab qn endpoint reached", room_id);
+
+		const questionData = this.collaborationService.getCollabQuestion(room_id);
+		if (questionData != null) {
+			console.log(questionData)
+			return {
+				status: true,
+				id: questionData.id,
+				title: questionData.title,
+				question: questionData.description,
+				categories: questionData.categories,
+				complexity: questionData.complexity,
+			};
+		} else {
+			console.log("empty")
+			return { status: false };
+		}
+	}
 }

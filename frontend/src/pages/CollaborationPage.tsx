@@ -71,24 +71,18 @@ export default function CollaborationPage() {
   useEffect(() => {
     const getCollabQuestion = async () => {
       try {
-        const solvedQuestions = decodedToken?.questions || [];
-        const solvedQuestionIds = solvedQuestions.map(q => q.id);
-        const response = await fetch("http://localhost:3002/questions/collab", {
-          method: "POST",
+        
+        const response = await fetch(`http://localhost:3008/collab/collab_qn/${roomId}`, {
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            categories: requestData.categories,
-            complexity: requestData.complexity,
-            roomId: roomId,
-            solvedQuestionIds: solvedQuestionIds
-          }),
         })
         const result = await response.json();
         if (result.status) {
           setQuestion(result)
         } else {
+          console.log(result.status)
           alert("Failed to get questions for collab")
           await endCollab();
           navigate('/matching-page')
@@ -208,7 +202,7 @@ export default function CollaborationPage() {
           solution: code,
           time: new Date().toLocaleString()
         }],
-        
+
       }),
     });
     if (!response.ok) {
