@@ -23,15 +23,14 @@ export class CollaborationController {
 	}
 
 	@Post('end_collab')
-	handleDeleteRoom(@Body() endCollabDto: EndCollabDto) {
-		console.log("Delete room endpoint reached");
-		const status = this.collaborationService.handleEndCollab(endCollabDto);
+	async handleEndCollab(@Body() endCollabDto: EndCollabDto) {
+		console.log("End collaboration endpoint reached");
+		const status = await this.collaborationService.handleEndCollab(endCollabDto);
 		return { status: status };
 	}
 
 	@Get('collab_qn/:room_id')
 	handleGetCollabQn(@Param('room_id') room_id: string) {
-		console.log(room_id)
 		console.log("Get collab qn endpoint reached", room_id);
 
 		const questionData = this.collaborationService.getCollabQuestion(room_id);
@@ -46,7 +45,6 @@ export class CollaborationController {
 				complexity: questionData.complexity,
 			};
 		} else {
-			console.log("empty")
 			return { status: false };
 		}
 	}

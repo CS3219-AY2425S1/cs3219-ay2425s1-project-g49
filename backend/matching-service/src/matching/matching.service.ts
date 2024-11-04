@@ -18,8 +18,6 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
   private readonly declineBuffer: Record<string, any[]> = {};
   private readonly acceptBuffer: Record<string, any[]> = {};
 
-  private readonly collabRooms: Record<string, any[]> = {};
-  private readonly userRooms: Record<string, string> = {};
   private readonly connectedUsers: Set<string> = new Set();
 
   private readonly matchingQueue = 'matching_queue';

@@ -41,15 +41,20 @@ export class UsersController {
     return findUser;
   }
 
+  @Get('/update_token/:email')
+  async updateToken(@Param('email') email: string) {
+    console.log("update token endpoint reached")
+    const newToken = await this.usersService.updateToken(email);
+    return newToken;
+  }
+
   @Patch(':email')
   async updateUser(
     @Param('email') email: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    console.log("user update enpoint reached", updateUserDto)
+    console.log("user update endpoint reached", updateUserDto)
     const updateUserToken = await this.usersService.updateUsers(email, updateUserDto);
-    // console.log(updateUser);
-    // if (!updateUser) throw new HttpException('User Not Found', 404);
     return updateUserToken;
   }
 

@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Question } from 'src/schemas/Question.schema';
 import { Model } from 'mongoose';
 import { User } from 'src/schemas/User.Schema';
+import { SolutionDto } from 'src/dto/UpdateUser.dto';
 
 
 
@@ -160,18 +161,16 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 			if (this.collabRooms[roomId]) {
 				delete this.collabRooms[roomId]
 			}
-			delete this.userRooms[email];
 
 			console.log("cleanup collab room successful")
 			console.log(this.userRooms)
 			console.log(this.collabRooms)
 			console.log(this.collabQuestions)
-
 		}
 	}
 
-	handleEndCollab(endCollabDto: EndCollabDto) {
-		const { email, roomId } = endCollabDto;
+	async handleEndCollab(endCollabDto: EndCollabDto) {
+		const { email, roomId, solution } = endCollabDto;
 		if (this.userRooms[email]) {
 			delete this.userRooms[email];
 		}
@@ -183,9 +182,29 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 			if (!this.userRooms[userA] && !this.userRooms[userB]) {
 				delete this.collabRooms[roomId];
 				console.log("Room deleted");
-				return true;
+				if (this.collabQuestions[roomId]) {
+					delete this.collabQuestions[roomId]
+				}
 			}
 		}
+		await this.updateUserSolution(email, solution);
+		return true;
+	}
+
+	async updateUserSolution(email: string, solutionDto: SolutionDto) {
+		console.log("Updating user now")
+		console.log(email)
+		const user = await this.userModel.findOne({ email }).exec();
+		console.log(user);
+		console.log(solutionDto);
+		const newUser = await this.userModel.findOneAndUpdate(
+			{ email },
+			{
+				$addToSet: { questions: solutionDto },
+			},
+			{ new: true }
+		).exec();
+		console.log(newUser, "UPdated")
 	}
 
 	handleValidateRoom(validateRoomDto: ValidateRoomDto): boolean {
@@ -238,6 +257,23 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 			return this.collabQuestions[roomId];
 		} else {
 			console.log("fail")
+			if (this.collabRooms[roomId]) {
+				const [userEmail, matchEmail] = this.collabRooms[roomId];
+				if (this.userRooms[userEmail]) {
+					delete this.userRooms[userEmail]
+				}
+				if (this.userRooms[matchEmail]) {
+					delete this.userRooms[matchEmail]
+				}
+
+				delete this.collabRooms[roomId];
+				delete this.collabQuestions[roomId];
+
+				console.log("cleanup collab room successful after failure to find a question")
+				console.log(this.userRooms)
+				console.log(this.collabRooms)
+				console.log(this.collabQuestions)
+			}
 			return null;
 		}
 	}

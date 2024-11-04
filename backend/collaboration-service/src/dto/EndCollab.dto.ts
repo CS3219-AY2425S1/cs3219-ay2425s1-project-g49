@@ -2,6 +2,7 @@ import {
   IsNotEmpty,
   IsString,
 } from 'class-validator';
+import { SolutionDto } from './UpdateUser.dto';
 
 
 export class EndCollabDto {
@@ -12,4 +13,7 @@ export class EndCollabDto {
   @IsNotEmpty()
   @IsString()
   roomId: string;
+
+  @IsNotEmpty()
+  solution: SolutionDto;
 }

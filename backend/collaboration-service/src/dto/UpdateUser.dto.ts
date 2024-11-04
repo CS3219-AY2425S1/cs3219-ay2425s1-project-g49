@@ -1,7 +1,7 @@
 import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, isString, IsString } from 'class-validator';
 
 
-export class QuestionDto {
+export class SolutionDto {
   @IsNotEmpty()
   @IsNumber()
   id: number;
@@ -9,7 +9,7 @@ export class QuestionDto {
   @IsNotEmpty()
   @IsString()
   title: string;
-
+  
   @IsNotEmpty()
   @IsString()
   solution: string;
@@ -38,5 +38,5 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsArray()
-  questions?: QuestionDto[];
+  questions?: SolutionDto[];
 }

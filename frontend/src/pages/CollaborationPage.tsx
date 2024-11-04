@@ -49,23 +49,23 @@ export default function CollaborationPage() {
 
 
 
-  const endCollab = async () => {
-    const response = await fetch("http://localhost:3008/collab/end_collab", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: decodedToken?.email,
-        roomId: roomId
-      }),
-    });
-    if (!response.ok) {
-      console.error("Failed to end collab");
-    } else {
-      console.log("Collab Room successfully deleted");
-    }
-  }
+  // const endCollab = async () => {
+  //   const response = await fetch("http://localhost:3008/collab/end_collab", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       email: decodedToken?.email,
+  //       roomId: roomId
+  //     }),
+  //   });
+  //   if (!response.ok) {
+  //     console.error("Failed to end collab");
+  //   } else {
+  //     console.log("Collab Room successfully deleted");
+  //   }
+  // }
 
 
   useEffect(() => {
@@ -84,7 +84,6 @@ export default function CollaborationPage() {
         } else {
           console.log(result.status)
           alert("Failed to get questions for collab")
-          await endCollab();
           navigate('/matching-page')
         }
       } catch (error) {
@@ -147,48 +146,33 @@ export default function CollaborationPage() {
   }
 
 
-  const removeQn = async () => {
-    const response = await fetch("http://localhost:3002/questions/delete_collabQn", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ roomId: roomId }),
-    });
-    if (!response.ok) {
-      console.error("Failed to remove user from queue");
-    } else {
-      console.log("User successfully removed from queue");
-    }
-  }
 
+  // const updateUser = async () => {
+  //   const response = await fetch(`http://localhost:3001/users/${decodedToken?.email}`, {
+  //     method: "PATCH",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       questions: [{
+  //         id: question?.id,
+  //         title: question?.title,
+  //         solution: code,
+  //         time: new Date().toLocaleString()
+  //       }]
+  //     }),
+  //   });
+  //   if (!response.ok) {
+  //     console.error("Failed to update user");
+  //   } else {
+  //     console.log("User successfully updated");
+  //     const data = await response.json()
+  //     localStorage.setItem("access_token", data.jwtToken);
+  //   }
+  // }
 
-  const updateUser = async () => {
-    const response = await fetch(`http://localhost:3001/users/${decodedToken?.email}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        questions: [{
-          id: question?.id,
-          title: question?.title,
-          solution: code,
-          time: new Date().toLocaleString()
-        }]
-      }),
-    });
-    if (!response.ok) {
-      console.error("Failed to update user");
-    } else {
-      console.log("User successfully updated");
-      const data = await response.json()
-      localStorage.setItem("access_token", data.jwtToken);
-    }
-  }
-
-  const endCollabSuccess = async () => {
-    const response = await fetch("http://localhost:3008/collab/end_collab_success", {
+  const endCollab = async () => {
+    const response = await fetch("http://localhost:3008/collab/end_collab", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -196,12 +180,12 @@ export default function CollaborationPage() {
       body: JSON.stringify({
         email: decodedToken?.email,
         roomId: roomId,
-        questions: [{
+        solution: {
           id: question?.id,
           title: question?.title,
           solution: code,
           time: new Date().toLocaleString()
-        }],
+        },
 
       }),
     });
@@ -213,9 +197,7 @@ export default function CollaborationPage() {
   }
 
   const submitCode = async () => {
-    // await removeQn();
-    await endCollabSuccess();
-    // await updateUser();
+    await endCollab();
     navigate("/matching-page");
     alert("Collaboration completed")
   };
