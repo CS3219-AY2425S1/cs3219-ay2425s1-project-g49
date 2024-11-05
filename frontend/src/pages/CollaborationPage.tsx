@@ -4,6 +4,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 import { Button, Icon, Grid, Segment, Loader, Header } from "semantic-ui-react";
 import Editor from "@monaco-editor/react";
 import CollaborativeEditor from "../components/CollaborativeEditor";
+import ChatWindow from "../components/ChatWindow";
 
 
 interface tokenQuestions {
@@ -251,6 +252,7 @@ export default function CollaborationPage() {
               </Header>
               <p>{question?.question}</p>
             </Segment>
+            <ChatWindow />
           </Grid.Column>
           <Grid.Column width={10}>
             {/* <Segment style={{ backgroundColor: "#1E1E1E", color: "#FFFFFF" }}>
@@ -267,6 +269,7 @@ export default function CollaborationPage() {
               />
             </Segment> */}
             <CollaborativeEditor sessionId={roomId!} onCodeChange={handleEditorChange} />
+            
           </Grid.Column>
         </Grid.Row>
       </Grid>
