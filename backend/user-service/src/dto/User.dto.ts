@@ -1,5 +1,23 @@
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
+export class QuestionDto {
+  @IsNotEmpty()
+  @IsNumber()
+  id: number;
+
+  @IsNotEmpty()
+  @IsString()
+  title: string;
+
+  @IsNotEmpty()
+  @IsString()
+  solution: string;
+
+  @IsNotEmpty()
+  @IsString()
+  time: string;
+}
+
 export class UserDto {
   @IsNotEmpty()
   @IsString()
@@ -19,6 +37,5 @@ export class UserDto {
 
   @IsOptional()
   @IsArray()
-  @IsNumber({}, { each: true })
-  questions?: number[];
+  questions?: QuestionDto[];
 }

@@ -42,5 +42,9 @@ services:
 
   collaboration-service:
     build: ./backend/collaboration-service
+    restart: on-failure
     ports:
       - "3008:3008"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy

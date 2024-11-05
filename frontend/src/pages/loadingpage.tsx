@@ -46,7 +46,7 @@ const LoadingPage: React.FC = () => {
     }
 
     const eventSource = new EventSource(
-      `http://localhost:3009/rabbitmq/${decodedToken?.email}`
+      `http://localhost:3009/matching/${decodedToken?.email}`
     );
     // console.log("connected");
     eventSource.onmessage = (event) => {
@@ -113,7 +113,7 @@ const LoadingPage: React.FC = () => {
       ...requestData,
       timeStamp: new Date().toISOString(),
     };
-    fetch("http://localhost:3009/rabbitmq/enter", {
+    fetch("http://localhost:3009/matching/enter", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -142,7 +142,7 @@ const LoadingPage: React.FC = () => {
   }
   
   const removeFromQueue = async () => {
-    const response = await fetch("http://localhost:3009/rabbitmq/remove_user", {
+    const response = await fetch("http://localhost:3009/matching/remove_user", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -158,7 +158,7 @@ const LoadingPage: React.FC = () => {
 
   const handleDecline = () => {
     console.log("DECLINE PRESSED")
-    fetch("http://localhost:3009/rabbitmq/match_declined", {
+    fetch("http://localhost:3009/matching/match_declined", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -176,7 +176,7 @@ const LoadingPage: React.FC = () => {
   }
 
   const getCollabRoomId = (): Promise<string | null> => {
-    return fetch("http://localhost:3009/rabbitmq/collab_room", {
+    return fetch("http://localhost:3008/collab/roomId", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -201,7 +201,7 @@ const LoadingPage: React.FC = () => {
 
   const handleAccept = () => {
     console.log("ACCEPT PRESSED")
-    fetch("http://localhost:3009/rabbitmq/match_accepted", {
+    fetch("http://localhost:3009/matching/match_accepted", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

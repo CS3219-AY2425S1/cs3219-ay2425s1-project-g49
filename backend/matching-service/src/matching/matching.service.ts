@@ -10,16 +10,26 @@ import { CollabRoomDto } from 'src/dto/CollabRoom.dto';
 import { DeleteRoomDto } from 'src/dto/DeleteRoom.dto';
 import { ValidateRoomDto } from 'src/dto/ValidateRoom.dto';
 
+
 @Injectable()
-export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
+export class MatchingService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly eventEmitter: EventEmitter2) { }
   private readonly matchBuffer: Record<string, any[]> = {};
   private readonly declineBuffer: Record<string, any[]> = {};
   private readonly acceptBuffer: Record<string, any[]> = {};
-  private readonly collabRooms: Record<string, any[]> = {};
-  private readonly userRooms: Record<string, string> = {};
+
   private readonly connectedUsers: Set<string> = new Set();
-  private readonly queueName = 'matching_queue';
+
+  private readonly matchingQueue = 'matching_queue';
+  private readonly matchingExchange = 'matching';
+  private readonly matchingRoutingKey = this.matchingQueue;
+
+  private readonly matchFoundQueue = 'match_found';
+  private readonly matchFoundRoutingKey = this.matchFoundQueue;
+
+  private readonly matchDeclinedQueue = 'match_declined';
+  private readonly matchDeclinedRoutingKey = this.matchDeclinedQueue;
+
   private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
   // private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
   private connection: amqp.Connection;
@@ -43,28 +53,70 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
           console.error('Failed to connect to RabbitMQ:', err);
           throw err;
         }
+        console.log('Connected to RabbitMQ');
         this.connection = connection;
+
         connection.createChannel((channelErr, channel) => {
           if (channelErr) {
             console.error('Failed to create a channel:', channelErr);
             throw channelErr;
           }
           this.channel = channel;
-          channel.assertQueue(
-            this.queueName,
-            { durable: false },
-            (error2, _ok) => {
-              if (error2) {
-                console.error('Failed to assert queue:', error2);
+
+          channel.assertExchange(this.matchingExchange, 'direct', { durable: false }, (exchangeErr) => {
+            if (exchangeErr) {
+              console.error('Failed to assert exchange:', exchangeErr);
+              return;
+            }
+            channel.assertQueue(this.matchingQueue, { durable: false }, (queueErr) => {
+              if (queueErr) {
+                console.error('Failed to assert queue:', queueErr);
                 return;
               }
-              console.log(`Queue ${this.queueName} is ready`);
-              resolve();
-            },
-          );
+
+              channel.assertQueue(this.matchFoundQueue, { durable: false }, (queueErr) => {
+                if (queueErr) {
+                  console.error('Failed to assert queue:', queueErr);
+                  return;
+                }
+
+                channel.assertQueue(this.matchDeclinedQueue, { durable: false }, (queueErr) => {
+                  if (queueErr) {
+                    console.error('Failed to assert queue:', queueErr);
+                    return;
+                  }
+
+                  channel.bindQueue(this.matchingQueue, this.matchingExchange, this.matchingRoutingKey, {}, (bindErr) => {
+                    if (bindErr) {
+                      console.error('Failed to bind queue to exchange:', bindErr);
+                      return;
+                    }
+
+                    console.log(`Queue ${this.matchingQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchingRoutingKey}`);
+
+                    channel.bindQueue(this.matchFoundQueue, this.matchingExchange, this.matchFoundRoutingKey, {}, (bindErr) => {
+                      if (bindErr) {
+                        console.error('Failed to bind queue to exchange:', bindErr);
+                        return;
+                      }
+                      console.log(`Queue ${this.matchFoundQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchFoundRoutingKey}`);
+
+                      channel.bindQueue(this.matchDeclinedQueue, this.matchingExchange, this.matchDeclinedRoutingKey, {}, (bindErr) => {
+                        if (bindErr) {
+                          console.error('Failed to bind queue to exchange:', bindErr);
+                          return;
+                        }
+                        console.log(`Queue ${this.matchDeclinedQueue} is bound to exchange ${this.matchingExchange} with routing key ${this.matchDeclinedRoutingKey}`);
+                        resolve();
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
         });
       });
-      console.log('Connected to RabbitMQ');
     });
   }
 
@@ -81,10 +133,8 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   enterQueue(enterQueueDto: EnterQueueDto): void {
     const { email } = enterQueueDto;
 
-    this.channel.sendToQueue(
-      this.queueName,
-      Buffer.from(JSON.stringify(enterQueueDto)),
-    );
+    this.channel.publish(this.matchingExchange, this.matchingRoutingKey, Buffer.from(JSON.stringify(enterQueueDto)));
+
     console.log('User sent to queue:', enterQueueDto);
 
     if (this.timeouts[email]) {
@@ -112,18 +162,14 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     }, 30000);
 
     this.timeouts[email] = timeoutId;
-    // timeoutId
-    // this.unmatchedRequests[`${enterQueueDto.categories}-${enterQueueDto.complexity}-${enterQueueDto.language}`] = {
-    //   ...enterQueueDto,
-    //   timeoutId,
-    // };
   }
+
 
   consumeQueue() {
     if (this.channel) {
       console.log('Waiting for users in queue...');
       console.log('unmatched request is', this.unmatchedRequests);
-      this.channel.consume(this.queueName, (msg) => {
+      this.channel.consume(this.matchingQueue, (msg) => {
         console.log('parsed to', JSON.parse(msg.content.toString()));
         if (msg !== null) {
           const userRequest = JSON.parse(msg.content.toString());
@@ -140,14 +186,13 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   }
 
   private matchUser(userRequest: EnterQueueDto): void {
-    // console.log("unmatched request is", this.unmatchedRequests);
-    const { email, categories, complexity, language } = userRequest;
+    const { email, categories, complexity, language, solvedQuestionIds } = userRequest;
     const matchingKey = `${categories}-${complexity}-${language}`;
     if (this.unmatchedRequests[matchingKey]) {
       const matchedUser = this.unmatchedRequests[matchingKey];
       console.log(`Match found between ${email} and ${matchedUser.email}`);
       delete this.unmatchedRequests[matchingKey];
-      this.notifyMatchFound(email, matchedUser.email, "Perfect");
+      this.notifyMatchFound(email, matchedUser.email, categories, complexity, solvedQuestionIds, matchedUser.solvedQuestionIds, "Perfect");
     } else if (
       Object.values(this.unmatchedRequests).find(
         (req) => req.categories === categories,
@@ -161,63 +206,13 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       );
       const partialMatchingKey = `${matchedUser.categories}-${matchedUser.complexity}-${matchedUser.language}`;
       delete this.unmatchedRequests[partialMatchingKey];
-      this.notifyMatchFound(email, matchedUser.email, "Partial");
+      this.notifyMatchFound(email, matchedUser.email, categories, complexity, solvedQuestionIds, matchedUser.solvedQuestionIds, "Partial");
     } else {
       this.unmatchedRequests[matchingKey] = userRequest;
       console.log(`No match found for user ${email}, waiting for a match...`);
     }
   }
 
-  generateRoom(userA: string, userB: string): string {
-    const roomID = uuidv4();
-    this.collabRooms[roomID] = [userA, userB];
-    this.userRooms[userA] = roomID;
-    this.userRooms[userB] = roomID;
-    return roomID;
-  }
-
-  handleDeleteRoom(deleteRoomDto: DeleteRoomDto) {
-    const { email, roomId } = deleteRoomDto;
-    if (this.userRooms[email]) {
-      delete this.userRooms[email];
-    }
-
-    if (this.collabRooms[roomId]) {
-      const users = this.collabRooms[roomId];
-      const userA = users[0];
-      const userB = users[1];
-      if (!this.userRooms[userA] && !this.userRooms[userB]) {
-        delete this.collabRooms[roomId];
-        console.log("Room deleted");
-        return true;
-      }
-    }
-  }
-
-  handleCollabRoom(collabRoomDto: CollabRoomDto): string {
-    const { userEmail, matchEmail } = collabRoomDto;
-    const existingRoomId = this.userRooms[userEmail];
-    const matchUserRoomId = this.userRooms[matchEmail];
-
-    if (!existingRoomId && !matchUserRoomId) {
-      return this.generateRoom(userEmail, matchEmail);
-    } else if (existingRoomId) {
-      return existingRoomId;
-    } else if (matchUserRoomId) {
-      return matchUserRoomId;
-    } else {
-      return 'Error: Both users are already in different rooms.';
-    }
-  }
-
-  handleValidateRoom(validateRoomDto: ValidateRoomDto): boolean {
-    const { email, roomId } = validateRoomDto;
-    if (!this.userRooms[email]) {
-      return false
-    } else {
-      return this.userRooms[email] === roomId;
-    }
-  }
 
   async removeUserFromQueue(userEmail: string): Promise<boolean> {
     const matchingKey = Object.keys(this.unmatchedRequests).find((key) => {
@@ -238,8 +233,17 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     return false;
   }
 
-  notifyMatchFound(userEmail: string, matchEmail: string, matchStatus: string) {
+  notifyMatchFound(userEmail: string, matchEmail: string, categories: string, complexity: string, userSolvedQns: number[], matchSolvedQns: number[], matchStatus: string,) {
     console.log('connected users are', this.connectedUsers);
+    this.channel.publish(this.matchingExchange, this.matchFoundRoutingKey, Buffer.from(JSON.stringify({
+      userEmail: userEmail,
+      matchEmail: matchEmail,
+      categories: categories,
+      complexity: complexity,
+      userSolvedQns: userSolvedQns,
+      matchSolvedQns: matchSolvedQns
+    })));
+
     const time = new Date().toISOString();
     const userData = {
       event: "Match",
@@ -278,6 +282,9 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
   handleMatchDecline(declineMatchDto: DeclineMatchDto) {
     const { email } = declineMatchDto;
+    this.channel.publish(this.matchingExchange, this.matchDeclinedRoutingKey, Buffer.from(JSON.stringify({
+      email: email,
+    })));
     const declineData = {
       event: "Decline",
       userEmail: email,   // Email address to send decline event to

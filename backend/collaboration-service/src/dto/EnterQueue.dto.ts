@@ -5,8 +5,6 @@ import {
   IsEnum,
   IsString,
   ValidateNested,
-  IsArray,
-  IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -64,9 +62,4 @@ export class EnterQueueDto {
       'Language must C, C#, C++, Go, Java, JavaScript, Kotlin, Python, Rust, TypeScript.',
   })
   language: Language;
-
-  @IsNotEmpty()
-  @IsArray()
-  @IsNumber({}, { each: true })
-  solvedQuestionIds: number[];
 }
