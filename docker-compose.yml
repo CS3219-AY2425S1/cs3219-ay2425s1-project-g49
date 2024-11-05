@@ -48,3 +48,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
+  chat-service:
+    build: ./backend/chat-service
+    ports:
+      - 3003:3003

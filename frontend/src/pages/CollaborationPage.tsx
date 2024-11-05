@@ -252,7 +252,7 @@ export default function CollaborationPage() {
               </Header>
               <p>{question?.question}</p>
             </Segment>
-            <ChatWindow />
+            <ChatWindow roomId={roomId!}/>
           </Grid.Column>
           <Grid.Column width={10}>
             {/* <Segment style={{ backgroundColor: "#1E1E1E", color: "#FFFFFF" }}>
