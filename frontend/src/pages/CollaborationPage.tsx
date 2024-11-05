@@ -5,7 +5,7 @@ import { Button, Icon, Grid, Segment, Loader, Header } from "semantic-ui-react";
 import Editor from "@monaco-editor/react";
 import CollaborativeEditor from "../components/CollaborativeEditor";
 import ChatWindow from "../components/ChatWindow";
-
+import ChatGPTButton from '../components/ChatGPTButton';
 
 interface tokenQuestions {
   id: number;
@@ -242,6 +242,7 @@ export default function CollaborationPage() {
           <Icon name="upload" />
           <span className="ml-2">Submit</span>
         </Button>
+        <ChatGPTButton/>
       </div>
       <Grid padded>
         <Grid.Row>
