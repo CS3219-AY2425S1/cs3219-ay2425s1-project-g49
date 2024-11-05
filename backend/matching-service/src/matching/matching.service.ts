@@ -30,8 +30,8 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
   private readonly matchDeclinedQueue = 'match_declined';
   private readonly matchDeclinedRoutingKey = this.matchDeclinedQueue;
 
-  private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
-  // private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
+  // private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
+  private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
   private connection: amqp.Connection;
   private channel: amqp.Channel;
   private unmatchedRequests: Record<string, any> = {};

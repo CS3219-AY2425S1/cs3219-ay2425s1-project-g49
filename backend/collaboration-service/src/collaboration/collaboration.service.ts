@@ -18,8 +18,8 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 	constructor(@InjectModel(Question.name) private questionModel: Model<Question>, @InjectModel(User.name) private userModel: Model<User>) { }
 	private readonly collabRooms: Record<string, any[]> = {};
 	private readonly userRooms: Record<string, string> = {};
-	private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
-	// private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
+	// private readonly rabbitmqUrl = 'amqp://guest:guest@rabbitmq:5672'; // For usage in docker container
+	private readonly rabbitmqUrl = 'amqp://guest:guest@localhost:5672'; // For local usage
 	private connection: amqp.Connection;
 	private channel: amqp.Channel;
 
