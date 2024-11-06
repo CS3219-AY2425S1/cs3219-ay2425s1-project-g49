@@ -56,7 +56,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
   return (
     <div>
-      <select
+      <select className="text-black mb-2"
         onChange={(e) => setSelectedLanguage(e.target.value)}
         value={selectedLanguage}
       >
