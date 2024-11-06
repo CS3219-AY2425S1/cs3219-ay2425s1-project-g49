@@ -19,6 +19,7 @@ services:
       - question-service
       - matching-service
       - collaboration-service
+      - chat-service
       - rabbitmq
 
   user-service:
