@@ -1,0 +1,19 @@
+
+  .myModal .header,
+  .myModal .content,
+  .myModal .actions {
+	background-color: #1E1E1E !important;
+	color: white !important;
+  }
+  
+
+  .myModalButton {
+	background-color: #3C3C3C !important;
+	color:white !important;
+	font: bold;
+  }
+  .myModalButton:hover {
+	background-color: #2F2F2F !important;
+	color:white !important;
+	font: bold;
+  }

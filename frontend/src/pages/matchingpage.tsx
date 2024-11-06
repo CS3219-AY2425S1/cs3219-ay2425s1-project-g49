@@ -2,8 +2,8 @@ import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { UserContext } from "../UserContextProvider";
-import { Button, Icon } from 'semantic-ui-react';
-
+import { Button, Icon, Table, Accordion } from 'semantic-ui-react';
+import SolvedQuestionTable from '../components/SolvedQuestionsTable';
 
 interface tokenQuestions {
     id: number;
@@ -107,7 +107,10 @@ export default function MatchingPage() {
                 </Button>
             </div>
             <div className="grid grid-cols-4 h-screen items-start">
-                <div className="mx-4 min-h-[85vh] bg-[#1E1E1E] outline outline-1 outline-[#2F2F2F] col-span-3 rounded-lg shadow-md"></div>
+                <div className="mx-4 max-h-[80vh] bg-[#1E1E1E] outline outline-1 outline-[#2F2F2F] col-span-3 rounded-lg shadow-md overflow-y-auto">
+                    <SolvedQuestionTable questions={decodedToken?.questions}/>
+
+                </div>
                 <div className="mx-4 min-h-[55vh] bg-[#1E1E1E] text-white col-span-1 rounded-lg shadow-md flex flex-col outline outline-1 outline-[#2F2F2F]">
                     <div className="flex flex-col px-4 py-2">
                         <label className="text-sm my-1 font-semibold text-left">Select Topic</label>
