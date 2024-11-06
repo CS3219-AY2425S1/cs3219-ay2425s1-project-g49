@@ -21,6 +21,8 @@ services:
       - collaboration-service
       - chat-service
       - rabbitmq
+    environment:
+      - REACT_APP_GOOGLE_API_KEY=AIzaSyB1S-ZSxrNg0j388tqN94VyRqfwS5PxBII
 
   user-service:
     build: ./backend/user-service

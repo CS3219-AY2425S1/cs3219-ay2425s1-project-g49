@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Modal } from 'semantic-ui-react';
 import { ChatContainer, MessageList, Message, MessageInput } from '@chatscope/chat-ui-kit-react';
-import axios from 'axios';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const ChatGPTButton: React.FC = () => {
+const GoogleGeminiButton: React.FC = () => {
     const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
@@ -23,27 +23,25 @@ const ChatGPTButton: React.FC = () => {
         setMessages((prevMessages) => [...prevMessages, userMessage]);
         setInput('');
 
+        // Initialize Google Generative AI client
+        const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GOOGLE_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
         try {
-            const res = await axios.post('https://api.openai.com/v1/chat/completions', {
-                model: 'gpt-3.5-turbo',
-                messages: [...messages, { role: 'user', content: message }],
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            // Call the Gemini API with the user input as the prompt
+            const result = await model.generateContent(message);
 
             const botResponse = {
-                message: res.data.choices[0].message.content,
+                message: result.response.text(),
                 sentTime: "just now",
                 sender: 'bot',
                 direction: 'incoming',
                 position: 'single',
             };
+
             setMessages((prevMessages) => [...prevMessages, botResponse]);
         } catch (error) {
-            console.error('Error fetching data from OpenAI:', error);
+            console.error('Error fetching data from Google Gemini:', error);
             const errorMessage = {
                 message: 'Error fetching data. Please try again.',
                 sentTime: "just now",
@@ -57,11 +55,11 @@ const ChatGPTButton: React.FC = () => {
 
     return (
         <>
-            <Button circular onClick={handleToggle} className="chatgpt-button flex items-center">
-                <img src={`${process.env.PUBLIC_URL}/chatgpt-logo.png`} alt="ChatGPT Logo" style={{ width: '18px', height: '18px' }} />
+            <Button circular color="black" onClick={handleToggle} className="chatgpt-button flex items-center">
+                <img src={`${process.env.PUBLIC_URL}/gemini-logo.png`} alt="ChatGPT Logo" style={{ width: '55px', height: '18px' }} />
             </Button>
             <Modal open={open} onClose={handleToggle} size="small">
-                <Modal.Header>ChatGPT-3.5 Turbo</Modal.Header>
+                <Modal.Header>Google Gemini</Modal.Header>
                 <Modal.Content>
                     <ChatContainer>
                         <MessageList>
@@ -94,4 +92,4 @@ const ChatGPTButton: React.FC = () => {
     );
 };
 
-export default ChatGPTButton;
+export default GoogleGeminiButton;
