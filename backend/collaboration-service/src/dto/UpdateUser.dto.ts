@@ -1,4 +1,4 @@
-import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, isString, IsString } from 'class-validator';
+import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 
 export class SolutionDto {

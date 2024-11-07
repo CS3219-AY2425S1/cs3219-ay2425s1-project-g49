@@ -83,6 +83,7 @@ export default function MatchingPage() {
 
             if (response.ok) {
                 console.log('Request sent successfully');
+                sessionStorage.setItem('fromMatchingPage', 'true');
                 navigate('/loading', { state: requestData });
             } else {
                 console.error('Failed to send request');

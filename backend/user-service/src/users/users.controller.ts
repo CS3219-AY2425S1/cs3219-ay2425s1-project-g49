@@ -54,8 +54,9 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     console.log("user update endpoint reached", updateUserDto)
-    const updateUserToken = await this.usersService.updateUsers(email, updateUserDto);
-    return updateUserToken;
+    const updatedUser = await this.usersService.updateUsers(email, updateUserDto);
+    if (!updatedUser) throw new HttpException('User not Found', 404);
+    return updatedUser;
   }
 
   @Delete(':email')

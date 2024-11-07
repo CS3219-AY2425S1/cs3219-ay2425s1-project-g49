@@ -11,8 +11,6 @@ import { User } from 'src/schemas/User.Schema';
 import { SolutionDto } from 'src/dto/UpdateUser.dto';
 
 
-
-
 @Injectable()
 export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 	constructor(@InjectModel(Question.name) private questionModel: Model<Question>, @InjectModel(User.name) private userModel: Model<User>) { }
@@ -242,9 +240,7 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 				id: { $nin: userSolvedQns }
 			});
 			const selectedQuestion = availableQuestions.length > 0 ? availableQuestions[0] : null;
-			// console.log(categories)
-			// console.log(complexity)
-			// console.log(availableQuestions);
+
 			this.collabQuestions[roomId] = selectedQuestion;
 			console.log(this.collabQuestions[roomId]);
 		}

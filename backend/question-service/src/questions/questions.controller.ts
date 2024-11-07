@@ -12,9 +12,6 @@ import {
 import { QuestionsService } from './questions.service';
 import { CreateQuestionDto } from '../dto/CreateQuestion.dto';
 import { UpdateQuestionDto } from '../dto/UpdateQuestion.dto';
-import { CollabQuestionDto } from 'src/dto/CollabQuestion.dto';
-import { DeleteCollabQnDto } from 'src/dto/DeleteCollabQn.dto';
-import { stat } from 'fs';
 
 @Controller('questions')
 export class QuestionsController {
@@ -66,32 +63,5 @@ export class QuestionsController {
     const deletedUser = await this.questionsService.deleteQuestion(id);
     if (!deletedUser) throw new HttpException('Question not Found', 404);
     return;
-  }
-
-  @Post('collab')
-  async getCollabQuestion(@Body() collabQuestionDto: CollabQuestionDto) {
-    console.log("get collab question endpoint reached")
-    const questionData = await this.questionsService.getCollabQuestion(collabQuestionDto);
-    console.log("Question retrieved is ", questionData);
-    if (questionData != null) {
-      return {
-        status: true,
-        id: questionData.id,
-        title: questionData.title,
-        question: questionData.description,
-        categories: questionData.categories,
-        complexity: questionData.complexity,
-      };
-    } else {
-      return { status: false };
-    }
-  }
-
-  @Post('delete_collabQn')
-  handleDeleteRoom(@Body() deleteCollabQnDto: DeleteCollabQnDto) {
-    console.log("Delete collab qn endpoint reached");
-    const status = this.questionsService.handleDeleteCollabQn(deleteCollabQnDto);
-    return { status: status };
-
   }
 }

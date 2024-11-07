@@ -31,10 +31,7 @@ export class UsersService {
       },
       { new: true }
     ).exec();
-    // const tokenData = { email: newUser['email'], name: newUser['username'], avatarUrl: newUser['avatarUrl'], questions: newUser['questions'] }
-    // console.log(tokenData);
-    // const accessToken = await this.jwtService.signAsync(tokenData, { expiresIn: "2h" });
-    // return { jwtToken: accessToken };
+    return newUser;
   }
 
   async updateToken(email: string) {

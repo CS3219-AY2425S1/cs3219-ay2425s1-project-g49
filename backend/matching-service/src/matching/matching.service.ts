@@ -5,11 +5,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
 import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
 import { AcceptMatchDto } from 'src/dto/AcceptMatch.dto';
-import { v4 as uuidv4 } from 'uuid';
-import { CollabRoomDto } from 'src/dto/CollabRoom.dto';
-import { DeleteRoomDto } from 'src/dto/DeleteRoom.dto';
-import { ValidateRoomDto } from 'src/dto/ValidateRoom.dto';
-
 
 @Injectable()
 export class MatchingService implements OnModuleInit, OnModuleDestroy {

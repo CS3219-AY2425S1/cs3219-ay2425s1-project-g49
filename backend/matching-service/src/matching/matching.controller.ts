@@ -1,18 +1,13 @@
 import { Controller, Post, Body, Sse, Param, MessageEvent } from '@nestjs/common';
 import { MatchingService } from './matching.service';
 import { EnterQueueDto } from 'src/dto/EnterQueue.dto';
-import { map, Observable, Subject, interval } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { DeclineMatchDto } from 'src/dto/DeclineMatch.dto';
 import { AcceptMatchDto } from 'src/dto/AcceptMatch.dto';
-import { get } from 'http';
-import { CollabRoomDto } from 'src/dto/CollabRoom.dto';
-import { DeleteRoomDto } from 'src/dto/DeleteRoom.dto';
-import { ValidateRoomDto } from 'src/dto/ValidateRoom.dto';
 
 @Controller('matching')
 export class RabbitMQController {
   constructor(private readonly matchingService: MatchingService) { }
-  private matchUsers: Record<string, Subject<any>> = {};
 
   @Post('enter')
   sendMessage(@Body() enterQueueDto: EnterQueueDto) {
@@ -39,21 +34,6 @@ export class RabbitMQController {
     this.matchingService.handleMatchAccept(acceptMatchDto);
     return { status: 'Processing accept' };
   }
-
-  // @Post('collab_room')
-  // handleCollabRoom(@Body() collabRoomDto: CollabRoomDto) {
-  //   console.log("Collab room endpoint reached");
-  //   const room_id = this.matchingService.handleCollabRoom(collabRoomDto);
-  //   return { room_id: room_id }
-  // }
-
-
-  // @Post('delete_room')
-  // handleDeleteRoom(@Body() deleteRoomDto: DeleteRoomDto) {
-  //   console.log("Delete room endpoint reached");
-  //   const status = this.matchingService.handleDeleteRoom(deleteRoomDto);
-  //   return { status: status };
-  // }
 
   @Post('remove_user')
   async removeUser(@Body('userEmail') userEmail: string) {

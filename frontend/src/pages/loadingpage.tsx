@@ -3,7 +3,6 @@ import { Loader, Button, Header, Container } from "semantic-ui-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import "semantic-ui-css/semantic.min.css";
-import { timeStamp } from "console";
 
 interface CustomJwtPayload extends JwtPayload {
   email?: string;
@@ -32,12 +31,15 @@ const LoadingPage: React.FC = () => {
       });
     }, 1000);
 
-    const disableBackButton = (event: PopStateEvent) => {
-      event.preventDefault();
-      navigate("/loading");
-    };
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", disableBackButton);
+
+    // const disableBackButton = (event: PopStateEvent) => {
+    //   event.preventDefault();
+    //   navigate('/loading')
+    // };
+    // window.history.pushState(null, "", window.location.href);
+
+
+    // window.addEventListener("popstate", disableBackButton);
 
     const jwtToken = localStorage.getItem("access_token");
     let decodedToken: CustomJwtPayload | null = null;
@@ -79,7 +81,7 @@ const LoadingPage: React.FC = () => {
               .then((roomId) => {
                 console.log("Room ID after fetching:", roomId); // Log the room ID
                 if (roomId) {
-                  navigate(`/collaboration-page/room_id/${roomId}`,  { state: requestData }); // Use the room ID for navigation
+                  navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData }); // Use the room ID for navigation
                 } else {
                   console.error("No room ID returned"); // Handle case where no room ID was returned
                 }
@@ -140,7 +142,7 @@ const LoadingPage: React.FC = () => {
   if (jwtToken) {
     decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
   }
-  
+
   const removeFromQueue = async () => {
     const response = await fetch("http://localhost:3009/matching/remove_user", {
       method: "POST",
@@ -222,7 +224,7 @@ const LoadingPage: React.FC = () => {
         .then((roomId) => {
           console.log("Room ID after fetching:", roomId); // Log the room ID
           if (roomId) {
-            navigate(`/collaboration-page/room_id/${roomId}`,  { state: requestData }); // Use the room ID for navigation
+            navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData }); // Use the room ID for navigation
           } else {
             console.error("No room ID returned"); // Handle case where no room ID was returned
           }
@@ -238,9 +240,9 @@ const LoadingPage: React.FC = () => {
       if (countdown > 0) {
         return (
           <Container textAlign="center">
-            <Loader active inverted indeterminate size="massive" content={`Matching in ${countdown} seconds`}/>
+            <Loader active inverted indeterminate size="massive" content={`Matching in ${countdown} seconds`} />
             <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "200px" }}>
-            <Button color="red" size="large" onClick={handleExit}> Cancel Search </Button>
+              <Button color="red" size="large" onClick={handleExit}> Cancel Search </Button>
             </div>
           </Container>
         );
