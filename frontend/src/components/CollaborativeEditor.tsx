@@ -18,7 +18,26 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   const [editorContent, setEditorContent] = useState<string>(initialCode);
   const socketRef = useRef<any>(null);
   const editorRef = useRef<any>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+  var language = sessionStorage.getItem("selectedLanguage");
+  const languageOptions = {
+    C: "c",
+    "C#": "csharp",
+    "C++": "cpp",
+    Go: "go",
+    Java: "java",
+    JavaScript: "javascript",
+    Kotlin: "kotlin",
+    Python: "python",
+    Rust: "rust",
+    TypeScript: "typescript",
+  };
+
+  const mappedValue = language
+    ? languageOptions[language as keyof typeof languageOptions]
+    : "c";
+
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(mappedValue);
+  console.log("selected is", sessionStorage.getItem("selectedLanguage"));
   useEffect(() => {
     socketRef.current = io("http://localhost:3008");
 
@@ -66,8 +85,15 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         onChange={(e) => setSelectedLanguage(e.target.value)}
         value={selectedLanguage}
       >
+        <option value="c">C</option>
+        <option value="csharp">C#</option>
+        <option value="cpp">C++</option>
+        <option value="go">Go</option>
+        <option value="java">Java</option>
         <option value="javascript">JavaScript</option>
+        <option value="kotlin">Kotlin</option>
         <option value="python">Python</option>
+        <option value="rust">Rust</option>
         <option value="typescript">TypeScript</option>
       </select>
       <MonacoEditor

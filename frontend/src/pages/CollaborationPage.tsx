@@ -31,7 +31,7 @@ interface Question {
 export default function CollaborationPage() {
   const [isValidRoom, setIsValidRoom] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [question, setQuestion] = useState<Question | null>(null); // Sample question data
+  const [question, setQuestion] = useState<Question | null>(); // Sample question data
   const [code, setCode] = useState<string>(
     sessionStorage.getItem("collab_editor_content") || "// Start Coding Here"
   );

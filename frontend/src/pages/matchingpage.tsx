@@ -61,7 +61,6 @@ export default function MatchingPage() {
     const [selectedLanguage, setSelectedLanguage] = useState(lang[0]);
 
     const handleSubmit = async () => {
-        console.log("submit button pressed");
         const solvedQuestions = decodedToken?.questions || [];
         const solvedQuestionIds = solvedQuestions.map(q => q.id);
         const requestData = {
@@ -83,6 +82,7 @@ export default function MatchingPage() {
 
             if (response.ok) {
                 console.log('Request sent successfully');
+                sessionStorage.setItem("selectedLanguage", selectedLanguage);
                 sessionStorage.setItem('fromMatchingPage', 'true');
                 navigate('/loading', { state: requestData });
             } else {
