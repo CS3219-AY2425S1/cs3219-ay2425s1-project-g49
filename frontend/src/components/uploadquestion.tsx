@@ -16,18 +16,59 @@ export interface JSONQuestion {
 }
 
 const UploadFile: React.FC<UploadFileProps> = ({ setQuestions }) => {
+  const allowedComplexities = ["Easy", "Medium", "Hard"];
+  const allowedCategories = [
+    "Strings",
+    "Algorithms",
+    "Data Structures",
+    "Bit Manipulation",
+    "Databases",
+    "Recursion",
+    "Arrays",
+    "Brainteaser",
+    "Heap",
+  ];
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const content = e.target?.result;
-        console.log("Content is: ", content);
         if (typeof content === "string") {
           try {
             const jsonQuestions: JSONQuestion[] = JSON.parse(content);
-            console.log("JSON questions are: ", jsonQuestions);
             for (const question of jsonQuestions) {
+              if (
+                !question.id ||
+                !question.title ||
+                !question.description ||
+                !question.categories ||
+                !question.complexity ||
+                !question.link
+              ) {
+                alert(
+                  "Each question must have id, title, description, categories, complexity, and link fields."
+                );
+                return;
+              }
+              if (!allowedComplexities.includes(question.complexity)) {
+                alert(
+                  `Invalid complexity: ${question.complexity}. Allowed complexities are: ${allowedComplexities.join(", ")}`
+                );
+                return;
+              }
+              const questionCategories = question.categories
+                .split(",")
+                .map((cat) => cat.trim());
+              const isValidCategories = questionCategories.every((cat) =>
+                allowedCategories.includes(cat)
+              );
+              if (!isValidCategories) {
+                alert(
+                  `Invalid categories: ${question.categories}. Allowed categories are: ${allowedCategories.join(", ")}`
+                );
+                return;
+              }
               const questionData = {
                 id: question.id,
                 title: question.title,
@@ -42,7 +83,6 @@ const UploadFile: React.FC<UploadFileProps> = ({ setQuestions }) => {
                   questionData
                 );
                 // const response = await axios.get('http://localhost:3002/questions');
-                console.log("Question created successfully:" + response.data);
               } catch (error) {
                 console.log("Error creating question: " + error);
               }
@@ -72,7 +112,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ setQuestions }) => {
               ...jsonQuestions,
             ]);
           } catch (error) {
-            alert("Error parsing JSON: " + error);
+            alert("Invalid file format: please upload json formatted file");
           }
         }
       };
