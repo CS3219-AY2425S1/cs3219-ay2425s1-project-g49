@@ -200,6 +200,7 @@ export default function CollaborationPage() {
     await endCollab();
     navigate("/matching-page");
     alert("Collaboration completed");
+    sessionStorage.setItem("collab_editor_content", "// Start Coding Here");
   };
 
   const handleEditorChange = (value: string | undefined) => {
