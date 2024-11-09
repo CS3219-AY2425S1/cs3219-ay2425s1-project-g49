@@ -5,7 +5,7 @@ import { Button, Icon, Grid, Segment, Loader, Header } from "semantic-ui-react";
 import Editor from "@monaco-editor/react";
 import CollaborativeEditor from "../components/CollaborativeEditor";
 import ChatWindow from "../components/ChatWindow";
-import GoogleGeminiButton from '../components/GoogleGeminiButton';
+import GoogleGeminiButton from "../components/GoogleGeminiButton";
 
 interface tokenQuestions {
   id: number;
@@ -28,18 +28,19 @@ interface Question {
   complexity: string;
 }
 
-
 export default function CollaborationPage() {
   const [isValidRoom, setIsValidRoom] = useState(false);
   const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState<Question | null>(null); // Sample question data
-  const [code, setCode] = useState<string>("// Start Coding Here");
+  const [code, setCode] = useState<string>(
+    sessionStorage.getItem("collab_editor_content") || "// Start Coding Here"
+  );
+  console.log("code is", code);
   const navigate = useNavigate();
   const location = useLocation();
   const requestData = location.state;
   const { roomId } = useParams();
   const editorRef = useRef<any>(null);
-
 
   const jwtToken = localStorage.getItem("access_token");
   let decodedToken: CustomJwtPayload | null = null;
@@ -47,8 +48,6 @@ export default function CollaborationPage() {
   if (jwtToken) {
     decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
   }
-
-
 
   // const endCollab = async () => {
   //   const response = await fetch("http://localhost:3008/collab/end_collab", {
@@ -68,30 +67,31 @@ export default function CollaborationPage() {
   //   }
   // }
 
-
   useEffect(() => {
     const getCollabQuestion = async () => {
       try {
-        
-        const response = await fetch(`http://localhost:3008/collab/collab_qn/${roomId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
+        const response = await fetch(
+          `http://localhost:3008/collab/collab_qn/${roomId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const result = await response.json();
         if (result.status) {
-          setQuestion(result)
+          setQuestion(result);
         } else {
-          console.log(result.status)
-          alert("Failed to get questions for collab")
-          navigate('/matching-page')
+          console.log(result.status);
+          alert("Failed to get questions for collab");
+          navigate("/matching-page");
         }
       } catch (error) {
         console.error("Error during collab Room post:", error);
         return null;
       }
-    }
+    };
 
     const validateRoom = async () => {
       try {
@@ -113,8 +113,10 @@ export default function CollaborationPage() {
           setIsValidRoom(true);
           await getCollabQuestion();
         } else {
-          alert("Invalid room. Room does not exist / you are not authorised for this collab room!")
-          navigate('/matching-page')
+          alert(
+            "Invalid room. Room does not exist / you are not authorised for this collab room!"
+          );
+          navigate("/matching-page");
         }
       } catch (error) {
         console.error("Error during accept post:", error);
@@ -145,8 +147,6 @@ export default function CollaborationPage() {
       </Header>
     </div>;
   }
-
-
 
   // const updateUser = async () => {
   //   const response = await fetch(`http://localhost:3001/users/${decodedToken?.email}`, {
@@ -185,9 +185,8 @@ export default function CollaborationPage() {
           id: question?.id,
           title: question?.title,
           solution: code,
-          time: new Date().toLocaleString()
+          time: new Date().toLocaleString(),
         },
-
       }),
     });
     if (!response.ok) {
@@ -195,12 +194,12 @@ export default function CollaborationPage() {
     } else {
       console.log("Collab Room successfully deleted");
     }
-  }
+  };
 
   const submitCode = async () => {
     await endCollab();
     navigate("/matching-page");
-    alert("Collaboration completed")
+    alert("Collaboration completed");
   };
 
   const handleEditorChange = (value: string | undefined) => {
@@ -242,7 +241,7 @@ export default function CollaborationPage() {
           <Icon name="upload" />
           <span className="ml-2">Submit</span>
         </Button>
-        <GoogleGeminiButton/>
+        <GoogleGeminiButton />
       </div>
       <Grid padded>
         <Grid.Row>
@@ -253,7 +252,7 @@ export default function CollaborationPage() {
               </Header>
               <p>{question?.question}</p>
             </Segment>
-            <ChatWindow roomId={roomId!}/>
+            <ChatWindow roomId={roomId!} />
           </Grid.Column>
           <Grid.Column width={10}>
             {/* <Segment style={{ backgroundColor: "#1E1E1E", color: "#FFFFFF" }}>
@@ -269,8 +268,11 @@ export default function CollaborationPage() {
                 }}
               />
             </Segment> */}
-            <CollaborativeEditor sessionId={roomId!} onCodeChange={handleEditorChange} />
-            
+            <CollaborativeEditor
+              sessionId={roomId!}
+              onCodeChange={handleEditorChange}
+              initialCode={code}
+            />
           </Grid.Column>
         </Grid.Row>
       </Grid>

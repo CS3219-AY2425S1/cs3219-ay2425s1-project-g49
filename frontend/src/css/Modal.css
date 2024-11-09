@@ -1,19 +1,22 @@
+.myModal .header,
+.myModal .content,
+.myModal .actions {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
 
-  .myModal .header,
-  .myModal .content,
-  .myModal .actions {
-	background-color: #1E1E1E !important;
-	color: white !important;
-  }
-  
+.myModalButton {
+  background-color: #3c3c3c !important;
+  color: white !important;
+  font: bold;
+}
+.myModalButton:hover {
+  background-color: #2f2f2f !important;
+  color: white !important;
+  font: bold;
+}
 
-  .myModalButton {
-	background-color: #3C3C3C !important;
-	color:white !important;
-	font: bold;
-  }
-  .myModalButton:hover {
-	background-color: #2F2F2F !important;
-	color:white !important;
-	font: bold;
-  }
+.remote-cursor {
+  border-left: 2px solid red; 
+  opacity: 0.8;
+}

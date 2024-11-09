@@ -10,6 +10,8 @@ COPY . .
 
 EXPOSE 3008
 
+ENV NODE_ENV=development
+
 CMD ["npm", "run", "start:dev"]
 
 

@@ -7,13 +7,15 @@ import parserBabel from "prettier/parser-babel";
 interface CollaborativeEditorProps {
   sessionId: string;
   onCodeChange: (code: string) => void;
+  initialCode: string;
 }
 
 const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   sessionId,
   onCodeChange,
+  initialCode,
 }) => {
-  const [editorContent, setEditorContent] = useState<string>("");
+  const [editorContent, setEditorContent] = useState<string>(initialCode);
   const socketRef = useRef<any>(null);
   const editorRef = useRef<any>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
@@ -34,8 +36,10 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   }, [sessionId]);
 
   const handleEditorChange: OnChange = (value) => {
-    setEditorContent(value || "");
-    onCodeChange(value || "");
+    const updatedCode = value || "";
+    setEditorContent(updatedCode);
+    onCodeChange(updatedCode);
+    sessionStorage.setItem("collab_editor_content", updatedCode);
     socketRef.current?.emit("edit", { sessionId, text: value });
   };
 
@@ -52,11 +56,13 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
+    editor.setValue(initialCode);
   };
 
   return (
     <div>
-      <select className="text-black mb-2"
+      <select
+        className="text-black mb-2"
         onChange={(e) => setSelectedLanguage(e.target.value)}
         value={selectedLanguage}
       >
