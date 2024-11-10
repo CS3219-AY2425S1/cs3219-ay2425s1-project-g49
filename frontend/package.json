@@ -56,6 +56,7 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.13",
     "@types/socket.io-client": "^1.4.36",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",

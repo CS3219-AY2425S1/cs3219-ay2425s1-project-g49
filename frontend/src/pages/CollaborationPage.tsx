@@ -35,7 +35,6 @@ export default function CollaborationPage() {
   const [code, setCode] = useState<string>(
     sessionStorage.getItem("collab_editor_content") || "// Start Coding Here"
   );
-  console.log("code is", code);
   const navigate = useNavigate();
   const location = useLocation();
   const requestData = location.state;

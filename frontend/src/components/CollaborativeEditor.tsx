@@ -3,6 +3,7 @@ import MonacoEditor, { OnChange } from "@monaco-editor/react";
 import io, { Socket } from "socket.io-client";
 import prettier from "prettier";
 import parserBabel from "prettier/parser-babel";
+import { debounce } from "lodash";
 
 interface CollaborativeEditorProps {
   sessionId: string;
@@ -18,6 +19,8 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   const [editorContent, setEditorContent] = useState<string>(initialCode);
   const socketRef = useRef<any>(null);
   const editorRef = useRef<any>(null);
+  const isRemoteUpdate = useRef(false); // Flag to track remote updates
+
   var language = sessionStorage.getItem("selectedLanguage");
   const languageOptions = {
     C: "c",
@@ -37,7 +40,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     : "c";
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>(mappedValue);
-  console.log("selected is", sessionStorage.getItem("selectedLanguage"));
+
   useEffect(() => {
     socketRef.current = io("http://localhost:3008");
 
@@ -45,6 +48,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
     socketRef.current.on("update", (data: { text: string }) => {
       if (editorRef.current && data.text !== editorRef.current.getValue()) {
+        isRemoteUpdate.current = true; // Set flag for remote update
         editorRef.current.setValue(data.text);
       }
     });
@@ -54,12 +58,21 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     };
   }, [sessionId]);
 
+  const debouncedEmit = debounce((sessionId, value) => {
+    socketRef.current?.emit("edit", { sessionId, text: value });
+  }, 100);
+
   const handleEditorChange: OnChange = (value) => {
+    if (isRemoteUpdate.current) {
+      isRemoteUpdate.current = false;
+      return;
+    }
+
     const updatedCode = value || "";
     setEditorContent(updatedCode);
     onCodeChange(updatedCode);
     sessionStorage.setItem("collab_editor_content", updatedCode);
-    socketRef.current?.emit("edit", { sessionId, text: value });
+    debouncedEmit(sessionId, updatedCode);
   };
 
   const handleFormat = () => {
@@ -69,7 +82,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         plugins: [parserBabel as any],
       });
       editorRef.current.setValue(formatted);
-      socketRef.current?.emit("edit", { sessionId, text: formatted });
+      debouncedEmit(sessionId, formatted);
     }
   };
 
