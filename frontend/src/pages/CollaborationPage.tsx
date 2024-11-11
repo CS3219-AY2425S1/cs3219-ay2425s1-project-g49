@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { Button, Icon, Grid, Segment, Loader, Header } from "semantic-ui-react";
-import Editor from "@monaco-editor/react";
 import CollaborativeEditor from "../components/CollaborativeEditor";
 import ChatWindow from "../components/ChatWindow";
 import GoogleGeminiButton from "../components/GoogleGeminiButton";
@@ -47,24 +46,6 @@ export default function CollaborationPage() {
   if (jwtToken) {
     decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
   }
-
-  // const endCollab = async () => {
-  //   const response = await fetch("http://localhost:3008/collab/end_collab", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       email: decodedToken?.email,
-  //       roomId: roomId
-  //     }),
-  //   });
-  //   if (!response.ok) {
-  //     console.error("Failed to end collab");
-  //   } else {
-  //     console.log("Collab Room successfully deleted");
-  //   }
-  // }
 
   useEffect(() => {
     const getCollabQuestion = async () => {
@@ -147,30 +128,6 @@ export default function CollaborationPage() {
     </div>;
   }
 
-  // const updateUser = async () => {
-  //   const response = await fetch(`http://localhost:3001/users/${decodedToken?.email}`, {
-  //     method: "PATCH",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       questions: [{
-  //         id: question?.id,
-  //         title: question?.title,
-  //         solution: code,
-  //         time: new Date().toLocaleString()
-  //       }]
-  //     }),
-  //   });
-  //   if (!response.ok) {
-  //     console.error("Failed to update user");
-  //   } else {
-  //     console.log("User successfully updated");
-  //     const data = await response.json()
-  //     localStorage.setItem("access_token", data.jwtToken);
-  //   }
-  // }
-
   const endCollab = async () => {
     const response = await fetch("http://localhost:3008/collab/end_collab", {
       method: "POST",
@@ -241,7 +198,7 @@ export default function CollaborationPage() {
           <Icon name="upload" />
           <span className="ml-2">Submit</span>
         </Button>
-        <GoogleGeminiButton />
+        <GoogleGeminiButton question={question?.question || "Default question"} code={code} roomId={roomId!}/>
       </div>
       <Grid padded>
         <Grid.Row>
@@ -255,19 +212,6 @@ export default function CollaborationPage() {
             <ChatWindow roomId={roomId!} />
           </Grid.Column>
           <Grid.Column width={10}>
-            {/* <Segment style={{ backgroundColor: "#1E1E1E", color: "#FFFFFF" }}>
-              <Editor
-                height="450px"
-                defaultLanguage="javascript"
-                value={code}
-                onChange={handleEditorChange}
-                theme="vs-dark"
-                onMount={(editor) => {
-                  editorRef.current = editor; // Set the editor reference
-                  editor.updateOptions({ automaticLayout: true }); // Enable automatic layout
-                }}
-              />
-            </Segment> */}
             <CollaborativeEditor
               sessionId={roomId!}
               onCodeChange={handleEditorChange}
