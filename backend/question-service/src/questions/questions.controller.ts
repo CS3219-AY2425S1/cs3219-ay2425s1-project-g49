@@ -27,6 +27,12 @@ export class QuestionsController {
     return this.questionsService.getQuestions();
   }
 
+  @Get('/stats')
+  async getQuestionStats() {
+    const questionStats = await this.questionsService.getQuestionStats();
+    return questionStats;
+  }
+
   @Get(':id')
   async getQuestionsById(@Param('id') id: string) {
     const isValid = mongoose.Types.ObjectId.isValid(id);
@@ -36,6 +42,7 @@ export class QuestionsController {
     return findQuestion;
   }
 
+ 
   @Patch(':id')
   async updateQuestion(
     @Param('id') id: string,

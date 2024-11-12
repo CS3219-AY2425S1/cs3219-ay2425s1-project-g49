@@ -10,6 +10,9 @@ interface tokenQuestions {
   id: number;
   title: string;
   solution: string;
+  language: string;
+  complexity: string;
+  categories: string;
   time: string;
 }
 
@@ -142,7 +145,8 @@ export default function CollaborationPage() {
           title: question?.title,
           solution: code,
           language: requestData.language,
-          complexity: question?.complexity,
+          complexity: question?.complexity, 
+          categories: question?.categories,
           time: new Date().toLocaleString(),
         },
       }),

@@ -38,4 +38,24 @@ export class QuestionsService {
   deleteQuestion(id: string) {
     return this.questionModel.deleteOne({ id: id }).exec();
   }
+
+  async getQuestionStats() {
+    const complexityData = await this.questionModel.aggregate([
+      {
+        $group: {
+          _id: '$complexity', 
+          count: { $sum: 1 }, 
+        },
+      }
+    ]).exec();
+
+    const formattedResult = complexityData.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      acc.totalQuestions = (acc.totalQuestions || 0) + item.count;
+      return acc;
+    }, {});
+
+    return formattedResult;
+
+  }
 }
