@@ -20,6 +20,10 @@ export class SolutionDto {
 
   @IsNotEmpty()
   @IsString()
+  complexity: string;
+
+  @IsNotEmpty()
+  @IsString()
   time: string;
 }
 

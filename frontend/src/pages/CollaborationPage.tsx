@@ -142,6 +142,7 @@ export default function CollaborationPage() {
           title: question?.title,
           solution: code,
           language: requestData.language,
+          complexity: question?.complexity,
           time: new Date().toLocaleString(),
         },
       }),

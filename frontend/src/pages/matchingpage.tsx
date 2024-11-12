@@ -10,6 +10,7 @@ interface tokenQuestions {
     title: string;
     solution: string;
     language: string;
+    complexity: string;
     time: string;
 }
 

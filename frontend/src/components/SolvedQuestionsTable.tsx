@@ -17,6 +17,7 @@ interface Question {
 	title: string;
 	solution: string;
 	language: string;
+	complexity: string;
 	time: string;
 }
 
@@ -43,6 +44,7 @@ const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({ questionsData
 						<Table.Header>
 							<Table.Row>
 								<Table.HeaderCell>Question</Table.HeaderCell>
+								<Table.HeaderCell>Difficulty</Table.HeaderCell>
 								<Table.HeaderCell>Coding Language</Table.HeaderCell>
 								<Table.HeaderCell>Time Attempted</Table.HeaderCell>
 							</Table.Row>
@@ -54,6 +56,7 @@ const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({ questionsData
 									key={index}
 									onClick={() => handleRowClick(question.title, question.solution)}>
 									<Table.Cell>{question.title}</Table.Cell>
+									<Table.Cell>{question.complexity}</Table.Cell>
 									<Table.Cell>{question.language}</Table.Cell>
 									<Table.Cell>{question.time}</Table.Cell>
 								</Table.Row>
