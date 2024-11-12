@@ -9,6 +9,7 @@ interface tokenQuestions {
     id: number;
     title: string;
     solution: string;
+    language: string;
     time: string;
 }
 
@@ -108,7 +109,7 @@ export default function MatchingPage() {
             </div>
             <div className="grid grid-cols-4 h-screen items-start">
                 <div className="mx-4 max-h-[80vh] bg-[#1E1E1E] outline outline-1 outline-[#2F2F2F] col-span-3 rounded-lg shadow-md overflow-y-auto">
-                    <SolvedQuestionTable questions={decodedToken?.questions} />
+                    <SolvedQuestionTable questionsData={decodedToken?.questions} />
 
                 </div>
                 <div className="mx-4 min-h-[55vh] bg-[#1E1E1E] text-white col-span-1 rounded-lg shadow-md flex flex-col outline outline-1 outline-[#2F2F2F]">

@@ -202,7 +202,7 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 			},
 			{ new: true }
 		).exec();
-		console.log(newUser, "UPdated")
+		console.log(newUser, "Updated")
 	}
 
 	handleValidateRoom(validateRoomDto: ValidateRoomDto): boolean {

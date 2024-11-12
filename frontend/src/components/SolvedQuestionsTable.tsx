@@ -9,21 +9,22 @@ import {
 	Button
 } from 'semantic-ui-react';
 
-import '../css/Modal.css'
+import '../css/SolvedQuestionsTable.css'
 
 
 interface Question {
 	id: number;
 	title: string;
 	solution: string;
+	language: string;
 	time: string;
 }
 
 interface SolvedQuestionTableProps {
-	questions?: Question[];
+	questionsData?: Question[];
 }
 
-const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({ questions = [] }) => {
+const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({ questionsData = [] }) => {
 	const [open, setOpen] = useState(false);
 	const [questionSolution, setQuestionSolution] = useState('');
 	const [questionTitle, setQuestionTitle] = useState('');
@@ -36,22 +37,24 @@ const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({ questions = [
 
 	return (
 		<div className='h-auto'>
-			{questions && questions.length > 0 ? (
+			{questionsData && questionsData.length > 0 ? (
 				<div className="text-lg text-white">
 					<Table celled inverted selectable>
 						<Table.Header>
 							<Table.Row>
 								<Table.HeaderCell>Question</Table.HeaderCell>
-								<Table.HeaderCell>Time Solved</Table.HeaderCell>
+								<Table.HeaderCell>Coding Language</Table.HeaderCell>
+								<Table.HeaderCell>Time Attempted</Table.HeaderCell>
 							</Table.Row>
 						</Table.Header>
 
-						<Table.Body>
-							{questions.map((question, index) => (
+						<Table.Body className='solvedTable'>
+							{questionsData.map((question, index) => (
 								<Table.Row
 									key={index}
 									onClick={() => handleRowClick(question.title, question.solution)}>
 									<Table.Cell>{question.title}</Table.Cell>
+									<Table.Cell>{question.language}</Table.Cell>
 									<Table.Cell>{question.time}</Table.Cell>
 								</Table.Row>
 							))}

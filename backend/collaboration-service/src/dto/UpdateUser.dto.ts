@@ -16,6 +16,10 @@ export class SolutionDto {
 
   @IsNotEmpty()
   @IsString()
+  language: string;
+
+  @IsNotEmpty()
+  @IsString()
   time: string;
 }
 

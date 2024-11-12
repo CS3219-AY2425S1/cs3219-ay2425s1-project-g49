@@ -20,3 +20,8 @@
   border-left: 2px solid red; 
   opacity: 0.8;
 }
+
+
+.solvedTable:hover {
+  cursor: grab;
+}
