@@ -19,7 +19,6 @@ const QuestionServicePage: React.FC = () => {
   const fetchQuestions = async () => {
     try {
       const response = await axios.get(`http://localhost:3002/questions/`);
-      console.log("response is ", response);
       setQuestions(response.data);
     } catch (error) {
       alert("Error fetching questions: " + error);
@@ -35,33 +34,33 @@ const QuestionServicePage: React.FC = () => {
   }
 
   return (
-  <div className="bg-[#121212] min-h-screen p-4 text-white">
-    <h1 className="text-3xl font-bold text-left mb-6">Peer Prep</h1>
-    <div className="flex justify-start items-center space-x-2 mb-4 text-sm">
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <FilterCategories
-        category={categoryFilter}
-        setCategory={setCategoryFilter}
-        questions={questions}
-      />
-      <FilterComplexity
-        complexity={complexityFilter}
-        setComplexity={setComplexityFilter}
-        questions={questions}
-      />
-      <UploadFile setQuestions={setQuestions} />
+    <div className="bg-[#121212] min-h-screen p-4 text-white">
+      <h1 className="text-3xl font-bold text-left mb-6">Peer Prep</h1>
+      <div className="flex justify-start items-center space-x-2 mb-4 text-sm">
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <FilterCategories
+          category={categoryFilter}
+          setCategory={setCategoryFilter}
+          questions={questions}
+        />
+        <FilterComplexity
+          complexity={complexityFilter}
+          setComplexity={setComplexityFilter}
+          questions={questions}
+        />
+        <UploadFile setQuestions={setQuestions} />
+      </div>
+
+      <div className="bg-[#1E1E1E] rounded-md shadow-md p-4">
+        <QuestionTable
+          searchTerm={searchTerm}
+          category={categoryFilter}
+          complexity={complexityFilter}
+          questions={questions}
+          setQuestions={setQuestions}
+        />
+      </div>
     </div>
-    
-    <div className="bg-[#1E1E1E] rounded-md shadow-md p-4">
-      <QuestionTable
-        searchTerm={searchTerm}
-        category={categoryFilter}
-        complexity={complexityFilter}
-        questions={questions}
-        setQuestions={setQuestions}
-      />
-    </div>
-  </div>
   );
 };
 
