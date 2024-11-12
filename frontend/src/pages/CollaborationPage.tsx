@@ -35,7 +35,7 @@ export default function CollaborationPage() {
   const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState<Question | null>(); // Sample question data
   const [code, setCode] = useState<string>(
-    sessionStorage.getItem("collab_editor_content") || "// Start Coding Here"
+    sessionStorage.getItem("collab_editor_content") || "// Start Coding Here1"
   );
   const navigate = useNavigate();
   const location = useLocation();
@@ -132,6 +132,7 @@ export default function CollaborationPage() {
   }
 
   const endCollab = async () => {
+    console.log("code is", code);
     const response = await fetch("http://localhost:3008/collab/end_collab", {
       method: "POST",
       headers: {
@@ -143,7 +144,7 @@ export default function CollaborationPage() {
         solution: {
           id: question?.id,
           title: question?.title,
-          solution: code,
+          solution: code.replace(/\n/g, "\\n"),
           language: requestData.language,
           complexity: question?.complexity, 
           categories: question?.categories,
@@ -162,7 +163,6 @@ export default function CollaborationPage() {
     await endCollab();
     navigate("/matching-page");
     alert("Collaboration completed");
-    sessionStorage.setItem("collab_editor_content", "// Start Coding Here");
   };
 
   const handleEditorChange = (value: string | undefined) => {
@@ -204,7 +204,11 @@ export default function CollaborationPage() {
           <Icon name="upload" />
           <span className="ml-2">Submit</span>
         </Button>
-        <GoogleGeminiButton question={question?.question || "Default question"} code={code} roomId={roomId!}/>
+        <GoogleGeminiButton
+          question={question?.question || "Default question"}
+          code={code}
+          roomId={roomId!}
+        />
       </div>
       <Grid padded>
         <Grid.Row>

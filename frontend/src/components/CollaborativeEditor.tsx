@@ -50,6 +50,8 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
       if (editorRef.current && data.text !== editorRef.current.getValue()) {
         isRemoteUpdate.current = true; // Set flag for remote update
         editorRef.current.setValue(data.text);
+        console.log(data.text);
+        onCodeChange(data.text);
       }
     });
 

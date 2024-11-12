@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-	Table,
-	ModalHeader,
-	ModalDescription,
-	ModalContent,
-	ModalActions,
-	Modal,
-	Button
-} from 'semantic-ui-react';
+  Table,
+  ModalHeader,
+  ModalDescription,
+  ModalContent,
+  ModalActions,
+  Modal,
+  Button,
+} from "semantic-ui-react";
 
-import '../css/SolvedQuestionsTable.css'
-
+import "../css/SolvedQuestionsTable.css";
 
 interface Question {
 	id: number;
@@ -23,19 +22,22 @@ interface Question {
 }
 
 interface SolvedQuestionTableProps {
-	questionsData?: Question[];
+  questionsData?: Question[];
 }
 
-const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({ questionsData = [] }) => {
-	const [open, setOpen] = useState(false);
-	const [questionSolution, setQuestionSolution] = useState('');
-	const [questionTitle, setQuestionTitle] = useState('');
+const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({
+  questionsData = [],
+}) => {
+  const [open, setOpen] = useState(false);
+  const [questionSolution, setQuestionSolution] = useState("");
+  const [questionTitle, setQuestionTitle] = useState("");
 
-	const handleRowClick = (title: string, solution: string) => {
-		setQuestionSolution(solution);
-		setQuestionTitle(title);
-		setOpen(true);
-	};
+  const handleRowClick = (title: string, solution: string) => {
+    setQuestionSolution(solution.replace(/\\n/g, "\n"));
+    setQuestionTitle(title);
+    setOpen(true);
+  };
+
 
 	return (
 		<div className='h-auto'>
@@ -71,23 +73,27 @@ const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({ questionsData
 				<p className="text-lg text-white">Start matching and solve questions!</p>
 			)}
 
-			{/* Modal for displaying solution */}
-			<Modal className='myModal'
-				open={open}
-				onOpen={() => setOpen(true)}
-				onClose={() => setOpen(false)}>
-				<ModalHeader>{questionTitle}</ModalHeader>
-				<ModalContent>
-					<p>{questionSolution}</p>
-				</ModalContent>
-				<ModalActions>
-					<Button className='myModalButton' onClick={() => setOpen(false)}>
-						Close
-					</Button>
-				</ModalActions>
-			</Modal>
-		</div>
-	);
+
+      {/* Modal for displaying solution */}
+      <Modal
+        className="myModal"
+        open={open}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+        style={{ whiteSpace: "pre-wrap" }}
+      >
+        <ModalHeader>{questionTitle}</ModalHeader>
+        <ModalContent>
+          <p>{questionSolution}</p>
+        </ModalContent>
+        <ModalActions>
+          <Button className="myModalButton" onClick={() => setOpen(false)}>
+            Close
+          </Button>
+        </ModalActions>
+      </Modal>
+    </div>
+  );
 };
 
 export default SolvedQuestionTable;

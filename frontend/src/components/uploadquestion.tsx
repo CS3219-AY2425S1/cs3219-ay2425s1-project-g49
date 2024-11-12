@@ -37,6 +37,12 @@ const UploadFile: React.FC<UploadFileProps> = ({ setQuestions }) => {
         if (typeof content === "string") {
           try {
             const jsonQuestions: JSONQuestion[] = JSON.parse(content);
+            const existingQuestions = await axios.get(
+              "http://localhost:3002/questions"
+            );
+            const existingQuestionIds = existingQuestions.data.map(
+              (q: JSONQuestion) => q.id
+            );
             for (const question of jsonQuestions) {
               if (
                 !question.id ||
@@ -69,6 +75,12 @@ const UploadFile: React.FC<UploadFileProps> = ({ setQuestions }) => {
                 );
                 return;
               }
+              if (existingQuestionIds.includes(Number(question.id))) {
+                alert(
+                  `Question with ID ${question.id} already exists in the database.`
+                );
+                continue;
+              }
               const questionData = {
                 id: question.id,
                 title: question.title,
@@ -87,26 +99,6 @@ const UploadFile: React.FC<UploadFileProps> = ({ setQuestions }) => {
                 console.log("Error creating question: " + error);
               }
             }
-
-            // WORKING EXAMPLE
-            // try {
-            //   const questionData = {
-            //     id: "3",
-            //     title: "this is title",
-            //     description: "this is question",
-            //     categories: "Heap",
-            //     complexity: "medium",
-            //     link: "www.google.com",
-            //   };
-            //   const response = await axios.post(
-            //     "http://localhost:3002/questions",
-            //     questionData
-            //   );
-            //   console.log("Question created successfully:" + response.data);
-            // } catch (error) {
-            //   console.log("Error creating question: " + error);
-            // }
-
             setQuestions((prevQuestions) => [
               ...prevQuestions,
               ...jsonQuestions,
