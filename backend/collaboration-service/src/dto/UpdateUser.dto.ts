@@ -1,4 +1,4 @@
-import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 
 export class SolutionDto {
@@ -21,6 +21,9 @@ export class SolutionDto {
   @IsNotEmpty()
   @IsString()
   complexity: string;
+
+  @IsNotEmpty()
+  categories: string;
 
   @IsNotEmpty()
   @IsString()

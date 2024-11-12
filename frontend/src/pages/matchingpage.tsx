@@ -6,12 +6,13 @@ import { Button, Icon, Table, Accordion } from "semantic-ui-react";
 import SolvedQuestionTable from "../components/SolvedQuestionsTable";
 
 interface tokenQuestions {
-  id: number;
-  title: string;
-  solution: string;
-  language: string;
-  complexity: string;
-  time: string;
+    id: number;
+    title: string;
+    solution: string;
+    language: string;
+    complexity: string;
+    categories: string;
+    time: string;
 }
 
 interface CustomJwtPayload extends JwtPayload {

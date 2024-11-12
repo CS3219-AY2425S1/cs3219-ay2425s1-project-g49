@@ -12,12 +12,13 @@ import {
 import "../css/SolvedQuestionsTable.css";
 
 interface Question {
-  id: number;
-  title: string;
-  solution: string;
-  language: string;
-  complexity: string;
-  time: string;
+	id: number;
+	title: string;
+	solution: string;
+	language: string;
+	complexity: string;
+	categories: string;
+	time: string;
 }
 
 interface SolvedQuestionTableProps {
@@ -37,42 +38,41 @@ const SolvedQuestionTable: React.FC<SolvedQuestionTableProps> = ({
     setOpen(true);
   };
 
-  return (
-    <div className="h-auto">
-      {questionsData && questionsData.length > 0 ? (
-        <div className="text-lg text-white">
-          <Table celled inverted selectable>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Question</Table.HeaderCell>
-                <Table.HeaderCell>Difficulty</Table.HeaderCell>
-                <Table.HeaderCell>Coding Language</Table.HeaderCell>
-                <Table.HeaderCell>Time Attempted</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
 
-            <Table.Body className="solvedTable">
-              {questionsData.map((question, index) => (
-                <Table.Row
-                  key={index}
-                  onClick={() =>
-                    handleRowClick(question.title, question.solution)
-                  }
-                >
-                  <Table.Cell>{question.title}</Table.Cell>
-                  <Table.Cell>{question.complexity}</Table.Cell>
-                  <Table.Cell>{question.language}</Table.Cell>
-                  <Table.Cell>{question.time}</Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </div>
-      ) : (
-        <p className="text-lg text-white">
-          Start matching and solve questions!
-        </p>
-      )}
+	return (
+		<div className='h-auto'>
+			{questionsData && questionsData.length > 0 ? (
+				<div className="text-lg text-white">
+					<Table celled inverted selectable>
+						<Table.Header>
+							<Table.Row>
+								<Table.HeaderCell>Question</Table.HeaderCell>
+								<Table.HeaderCell>Categories</Table.HeaderCell>
+								<Table.HeaderCell>Difficulty</Table.HeaderCell>
+								<Table.HeaderCell>Coding Language</Table.HeaderCell>
+								<Table.HeaderCell>Time Attempted</Table.HeaderCell>
+							</Table.Row>
+						</Table.Header>
+
+						<Table.Body className='solvedTable'>
+							{questionsData.map((question, index) => (
+								<Table.Row
+									key={index}
+									onClick={() => handleRowClick(question.title, question.solution)}>
+									<Table.Cell>{question.title}</Table.Cell>
+									<Table.Cell>{question.categories}</Table.Cell>
+									<Table.Cell>{question.complexity}</Table.Cell>
+									<Table.Cell>{question.language}</Table.Cell>
+									<Table.Cell>{question.time}</Table.Cell>
+								</Table.Row>
+							))}
+						</Table.Body>
+					</Table>
+				</div>
+			) : (
+				<p className="text-lg text-white">Start matching and solve questions!</p>
+			)}
+
 
       {/* Modal for displaying solution */}
       <Modal
