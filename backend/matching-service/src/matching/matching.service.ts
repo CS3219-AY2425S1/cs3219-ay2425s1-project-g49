@@ -186,6 +186,7 @@ export class MatchingService implements OnModuleInit, OnModuleDestroy {
     if (this.unmatchedRequests[matchingKey]) {
       const matchedUser = this.unmatchedRequests[matchingKey];
       console.log(`Match found between ${email} and ${matchedUser.email}`);
+      if (email === matchedUser.email) return;
       delete this.unmatchedRequests[matchingKey];
       this.notifyMatchFound(email, matchedUser.email, categories, complexity, solvedQuestionIds, matchedUser.solvedQuestionIds, "Perfect");
     } else if (

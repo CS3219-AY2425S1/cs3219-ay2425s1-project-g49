@@ -9,14 +9,14 @@ import {
 import { Type } from 'class-transformer';
 
 enum Category {
-  Algorithm = 'Algorithm',
-  DynamicProgramming = 'DynamicProgramming',
-  Array = 'Array',
-  SQL = 'SQL',
-  Heap = 'Heap',
+  Algorithm = 'Algorithms',
+  Strings = 'Strings',
+  DataStructures = 'DataStructures',
+  BitManipulation = 'BitManipulation',
+  Databases = 'Databases',
   Recursion = 'Recursion',
-  Graph = 'Graph',
-  Sorting = 'Sorting',
+  Arrays = 'Arrays',
+  Brainteaser = 'Brainteaser',
 }
 
 enum Difficulty {

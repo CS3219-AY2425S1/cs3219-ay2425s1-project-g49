@@ -237,9 +237,24 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 			const availableQuestions = await this.questionModel.find({
 				categories: { $regex: new RegExp(categories, 'i') },
 				complexity: complexity,
-				id: { $nin: userSolvedQns }
 			});
-			const selectedQuestion = availableQuestions.length > 0 ? availableQuestions[0] : null;
+
+			const solvedQuestions = new Set([
+				...userSolvedQns,
+				...matchSolvedQns
+			]);
+
+			const uniqueQuestions = availableQuestions.filter((question) => {
+				return !solvedQuestions.has(question.id);
+			});
+			
+			let selectedQuestion
+
+			if (uniqueQuestions.length > 0) {
+				selectedQuestion = uniqueQuestions[Math.floor(Math.random() * uniqueQuestions.length)];
+			} else {
+				selectedQuestion = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+			}
 
 			this.collabQuestions[roomId] = selectedQuestion;
 			console.log(this.collabQuestions[roomId]);

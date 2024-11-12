@@ -3,6 +3,7 @@ import { Loader, Button, Header, Container } from "semantic-ui-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import "semantic-ui-css/semantic.min.css";
+import { replace } from "lodash";
 
 interface CustomJwtPayload extends JwtPayload {
   email?: string;
@@ -31,15 +32,15 @@ const LoadingPage: React.FC = () => {
       });
     }, 1000);
 
+    const currentPage = window.location.pathname;
 
-    // const disableBackButton = (event: PopStateEvent) => {
-    //   event.preventDefault();
-    //   navigate('/loading')
-    // };
-    // window.history.pushState(null, "", window.location.href);
-
-
-    // window.addEventListener("popstate", disableBackButton);
+    window.addEventListener('popstate', () => {
+      console.log(currentPage)
+      if (currentPage === '/loading') {
+        removeFromQueue().then(() => {
+        });
+      }
+    });
 
     const jwtToken = localStorage.getItem("access_token");
     let decodedToken: CustomJwtPayload | null = null;
@@ -193,11 +194,11 @@ const LoadingPage: React.FC = () => {
       })
       .then((result) => {
         console.log("Collab Room post successful", result);
-        return result.room_id; // Return the room ID
+        return result.room_id;
       })
       .catch((error) => {
         console.error("Error during collab Room post:", error);
-        return null; // Explicitly return null on error
+        return null; 
       });
   };
 
