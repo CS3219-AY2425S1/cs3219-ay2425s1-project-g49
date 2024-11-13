@@ -37,6 +37,7 @@ const GoogleGeminiButton: React.FC<GoogleGeminiButtonProps> = ({ question, code,
 
     if (isActive) {
       // generate a hint every 30 seconds
+      alert("Gemini API enabled and will generate hints every 30 seconds.");
       intervalId = setInterval(generateHint, 30000);
     } else {
       if (intervalId) {
