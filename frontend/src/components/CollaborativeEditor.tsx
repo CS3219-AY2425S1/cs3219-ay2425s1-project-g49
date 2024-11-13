@@ -62,7 +62,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
   const debouncedEmit = debounce((sessionId, value) => {
     socketRef.current?.emit("edit", { sessionId, text: value });
-  }, 100);
+  }, 10);
 
   const handleEditorChange: OnChange = (value) => {
     if (isRemoteUpdate.current) {
