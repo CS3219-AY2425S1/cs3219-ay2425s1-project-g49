@@ -29,7 +29,7 @@ export const UserContext = createContext<UserContextType | null>(null);
 export function UserContextProvider({ children }: { children: React.ReactNode }) {
 	const [token, setToken] = useState<string | null>(null);
 	const [loggedIn, setLoggedIn] = useState(false);
-	const [ready, setReady] = useState(false); // New loading state
+	const [ready, setReady] = useState(false);
 	const navigate = useNavigate();
 
 	const isTokenValid = (token: string) => {
@@ -42,7 +42,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
 
 		const checkUpdate = async (email: string) => {
 			try {
-
+				console.log("checking update")
 				const response = await fetch(`http://localhost:3001/users/update_token/${email}`, {
 					method: "GET",
 					headers: {
@@ -64,6 +64,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
 
 		const jwtToken = localStorage.getItem("access_token");
 		if (jwtToken) {
+			console.log("from provider")
 			const { tokenStatus, email } = isTokenValid(jwtToken);
 			if (tokenStatus) {
 				checkUpdate(email);

@@ -12,6 +12,10 @@ export class CreateUserDto {
   @IsString()
   username: string;
 
+  @IsOptional()
+  @IsString()
+  role?: string;
+
   @IsNotEmpty()
   @IsString()
   email: string;
@@ -19,9 +23,5 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   avatarUrl: string;
-
-  @IsOptional()
-  @IsString()
-  displayName?: string;
 
 }
