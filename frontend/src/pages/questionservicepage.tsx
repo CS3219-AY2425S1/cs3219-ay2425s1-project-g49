@@ -54,7 +54,6 @@ const QuestionServicePage: React.FC = () => {
 
     if (jwtToken) {
       decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
-      console.log(decodedToken);
     }
 
     if (decodedToken?.role === 'admin') {

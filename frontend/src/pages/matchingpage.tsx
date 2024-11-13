@@ -61,7 +61,6 @@ export default function MatchingPage() {
     if (decodedToken?.email) {
       setUserEmail(decodedToken?.email);
     } else {
-      console.log("Email not found in the token");
       navigate("/login");
     }
   }, [navigate]);
@@ -106,7 +105,6 @@ export default function MatchingPage() {
       });
 
       if (response.ok) {
-        console.log("Request sent successfully");
         sessionStorage.setItem("selectedLanguage", selectedLanguage);
         sessionStorage.setItem("fromMatchingPage", "true");
         navigate("/loading", { state: requestData });
