@@ -76,6 +76,10 @@ export default function MatchingPage() {
     navigate("/profile");
   };
 
+  const questionpage = () => {
+    navigate("/questions-page");
+  };
+
   const [selectedTopic, setSelectedTopic] = useState(topic[0]);
   const [selectedDificulty, setSelectedDifficulty] = useState(difficulty[0]);
   const [selectedLanguage, setSelectedLanguage] = useState(lang[0]);
@@ -121,6 +125,16 @@ export default function MatchingPage() {
           PeerPrep
         </h1>
         <div className="flex-1"></div>
+        <Button
+          icon
+          circular
+          className="flex items-center px-4"
+          color="google plus"
+          onClick={questionpage}
+        >
+          <Icon name="book" />
+          <span className="ml-2">Questions Page</span>
+        </Button>
         <Button
           icon
           circular
