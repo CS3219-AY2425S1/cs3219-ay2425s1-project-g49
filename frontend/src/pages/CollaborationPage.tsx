@@ -177,13 +177,6 @@ export default function CollaborationPage() {
     }
   };
 
-
-  const formatCode = () => {
-    if (editorRef.current) {
-      editorRef.current.getAction("editor.action.formatDocument").run(); // Use Monaco's format action
-    }
-  };
-
   return (
     <div>
       <div className="flex items-center justify-between pr-4">
@@ -191,16 +184,6 @@ export default function CollaborationPage() {
           PeerPrep
         </h1>
         <div className="flex-1"></div>
-        <Button
-          icon
-          circular
-          className="flex items-center px-4"
-          color="vk"
-          onClick={formatCode}
-        >
-          <Icon name="code" />
-          <span className="ml-2">Format</span>
-        </Button>
         <Button
           icon
           circular
