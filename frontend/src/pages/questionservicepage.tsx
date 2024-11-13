@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { UserContext } from "../UserContextProvider";
 import axios from "axios";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 import QuestionTable from "../components/questiontable";
 import FilterCategories from "../components/filtercategory";
 import FilterComplexity from "../components/filtercomplexity";
@@ -8,13 +9,33 @@ import SearchBar from "../components/searchbar";
 import UploadFile from "../components/uploadquestion";
 import { Question } from "../components/questiontable";
 
+
+interface tokenQuestions {
+  id: number;
+  title: string;
+  solution: string;
+  language: string;
+  complexity: string;
+  categories: string;
+  time: string;
+}
+
+interface CustomJwtPayload extends JwtPayload {
+  email?: string;
+  name?: string;
+  role?: string;
+  questions?: tokenQuestions[];
+}
+
 const QuestionServicePage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [complexityFilter, setComplexityFilter] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [admin, setAdmin] = useState(false);
   const context = useContext(UserContext);
   const { ready } = context!;
+
 
   const fetchQuestions = async () => {
     try {
@@ -26,6 +47,18 @@ const QuestionServicePage: React.FC = () => {
   };
 
   useEffect(() => {
+    const jwtToken = localStorage.getItem("access_token");
+    let decodedToken: CustomJwtPayload | null = null;
+
+    if (jwtToken) {
+      decodedToken = jwtDecode<CustomJwtPayload>(jwtToken);
+      console.log(decodedToken);
+    }
+
+    if (decodedToken?.role === 'admin') {
+      setAdmin(true);
+    }
+
     fetchQuestions();
   }, [questions]);
 
@@ -48,7 +81,7 @@ const QuestionServicePage: React.FC = () => {
           setComplexity={setComplexityFilter}
           questions={questions}
         />
-        <UploadFile setQuestions={setQuestions} />
+        {admin && (<UploadFile setQuestions={setQuestions} />)}
       </div>
 
       <div className="bg-[#1E1E1E] rounded-md shadow-md p-4">
@@ -58,6 +91,7 @@ const QuestionServicePage: React.FC = () => {
           complexity={complexityFilter}
           questions={questions}
           setQuestions={setQuestions}
+          admin={admin}
         />
       </div>
     </div>

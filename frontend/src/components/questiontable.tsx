@@ -17,6 +17,7 @@ interface QuestionTableProps {
   complexity: string;
   questions: Question[];
   setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
+  admin: boolean,
 }
 
 const QuestionTable: React.FC<QuestionTableProps> = ({
@@ -25,6 +26,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
   complexity,
   questions,
   setQuestions,
+  admin,
 }) => {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
@@ -58,7 +60,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
 
   const handleUpdate = async (updatedQuestion: Question) => {
     try {
-        console.log("updated question is ", updatedQuestion)
+      console.log("updated question is ", updatedQuestion)
       const response = await axios.patch(
         `http://localhost:3002/questions/${updatedQuestion.id}`,
         updatedQuestion
@@ -88,7 +90,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
             <th className="border px-4 py-2">Categories</th>
             <th className="border px-4 py-2">Complexity</th>
             <th className="border px-4 py-2">Link</th>
-            <th className="border px-4 py-2">Actions</th>
+            {admin && (<th className="border px-4 py-2">Actions</th>)}
           </tr>
         </thead>
         <tbody className="bg-[#1E1E1E]">
@@ -109,22 +111,23 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
                   View
                 </a>
               </td>
-              <td className="border px-4 py-2">
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleDelete(question.id)}
-                    className="bg-red-500 text-white rounded px-2 py-1"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => setEditingQuestion(question)}
-                    className="bg-red-500 text-white rounded px-2 py-1"
-                  >
-                    Edit
-                  </button>
-                </div>
-              </td>
+              {admin && (
+                <td className="border px-4 py-2">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleDelete(question.id)}
+                      className="bg-red-500 text-white rounded px-2 py-1"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => setEditingQuestion(question)}
+                      className="bg-red-500 text-white rounded px-2 py-1"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </td>)}
             </tr>
           ))}
           {filteredQuestions.length === 0 && (
@@ -139,7 +142,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({
           )}
         </tbody>
       </table>
-      {editingQuestion && (
+      {editingQuestion && admin && (
         <EditQuestionForm
           question={editingQuestion}
           onUpdate={handleUpdate}

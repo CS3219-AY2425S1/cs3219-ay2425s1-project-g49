@@ -1,7 +1,7 @@
 import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, isString, IsString } from 'class-validator';
 
 
-export class QuestionDto {
+export class SolutionDto {
   @IsNotEmpty()
   @IsNumber()
   id: number;
@@ -9,10 +9,21 @@ export class QuestionDto {
   @IsNotEmpty()
   @IsString()
   title: string;
-
+  
   @IsNotEmpty()
   @IsString()
   solution: string;
+
+  @IsNotEmpty()
+  @IsString()
+  language: string;
+
+  @IsNotEmpty()
+  @IsString()
+  complexity: string;
+
+  @IsNotEmpty()
+  categories: string;
 
   @IsNotEmpty()
   @IsString()
@@ -23,6 +34,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   username?: string;
+  
+  @IsOptional()
+  @IsString()
+  role?: string;
 
   @IsOptional()
   @IsString()
@@ -33,10 +48,6 @@ export class UpdateUserDto {
   avatarUrl?: string;
 
   @IsOptional()
-  @IsString()
-  displayName?: string;
-
-  @IsOptional()
   @IsArray()
-  questions?: QuestionDto[];
+  questions?: SolutionDto[];
 }

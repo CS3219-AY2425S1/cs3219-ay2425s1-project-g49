@@ -37,15 +37,15 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
+  role?: string;
+
+  @IsOptional()
+  @IsString()
   email?: string;
 
   @IsOptional()
   @IsString()
   avatarUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  displayName?: string;
 
   @IsOptional()
   @IsArray()
