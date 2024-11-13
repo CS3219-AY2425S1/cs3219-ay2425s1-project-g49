@@ -54,7 +54,6 @@ const LoadingPage: React.FC = () => {
     // console.log("connected");
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("Data received is", data);
       if (data.event === "Match") {
         if (data.userEmail === decodedToken?.email) {
           setMatchFound(true);
@@ -81,9 +80,9 @@ const LoadingPage: React.FC = () => {
             getCollabRoomId()
               .then((roomId) => {
                 if (roomId) {
-                  navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData }); 
+                  navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData });
                 } else {
-                  console.error("No room ID returned"); 
+                  console.error("No room ID returned");
                 }
               })
               .catch((error) => {
@@ -159,7 +158,6 @@ const LoadingPage: React.FC = () => {
   };
 
   const handleDecline = () => {
-    console.log("DECLINE PRESSED")
     fetch("http://localhost:3009/matching/match_declined", {
       method: "POST",
       headers: {
@@ -192,17 +190,16 @@ const LoadingPage: React.FC = () => {
         return response.json();
       })
       .then((result) => {
-        console.log("Collab Room post successful", result);
+        console.log("Collab Room post successful");
         return result.room_id;
       })
       .catch((error) => {
         console.error("Error during collab Room post:", error);
-        return null; 
+        return null;
       });
   };
 
   const handleAccept = () => {
-    console.log("ACCEPT PRESSED")
     fetch("http://localhost:3009/matching/match_accepted", {
       method: "POST",
       headers: {
@@ -222,15 +219,15 @@ const LoadingPage: React.FC = () => {
     if (matchAccepted) {
       getCollabRoomId()
         .then((roomId) => {
-          console.log("Room ID after fetching:", roomId); // Log the room ID
+          console.log("Room ID after fetching:");
           if (roomId) {
-            navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData }); // Use the room ID for navigation
+            navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData });
           } else {
-            console.error("No room ID returned"); // Handle case where no room ID was returned
+            console.error("No room ID returned");
           }
         })
         .catch((error) => {
-          console.error("Error getting collab room:", error); // Handle any errors that occurred
+          console.error("Error getting collab room:", error);
         });
     }
   }
