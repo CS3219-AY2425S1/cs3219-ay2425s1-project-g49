@@ -19,17 +19,6 @@ import { UpdateUserDto } from '../dto/UpdateUser.dto';
 export class UsersController {
   constructor(private usersService: UsersService) { }
 
-  @Post()
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    const existingUser = await this.usersService.getUserByEmail(createUserDto.email);
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    } else {
-      console.log("CREATED USER", createUserDto)
-      return this.usersService.createUser(createUserDto);
-    }
-  }
-
   @Get()
   getUsers() {
     return this.usersService.getUsers();
