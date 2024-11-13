@@ -80,15 +80,14 @@ const LoadingPage: React.FC = () => {
           if (userAccepted) {
             getCollabRoomId()
               .then((roomId) => {
-                console.log("Room ID after fetching:", roomId); // Log the room ID
                 if (roomId) {
-                  navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData }); // Use the room ID for navigation
+                  navigate(`/collaboration-page/room_id/${roomId}`, { state: requestData }); 
                 } else {
-                  console.error("No room ID returned"); // Handle case where no room ID was returned
+                  console.error("No room ID returned"); 
                 }
               })
               .catch((error) => {
-                console.error("Error getting collab room:", error); // Handle any errors that occurred
+                console.error("Error getting collab room:", error);
               });
           }
           clearInterval(timer);

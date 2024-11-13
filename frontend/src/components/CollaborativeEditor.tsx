@@ -9,12 +9,14 @@ interface CollaborativeEditorProps {
   sessionId: string;
   onCodeChange: (code: string) => void;
   initialCode: string;
+  onLanguageChange: (code: string) => void;
 }
 
 const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   sessionId,
   onCodeChange,
   initialCode,
+  onLanguageChange,
 }) => {
   const [editorContent, setEditorContent] = useState<string>(initialCode);
   const socketRef = useRef<any>(null);
@@ -50,7 +52,6 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
       if (editorRef.current && data.text !== editorRef.current.getValue()) {
         isRemoteUpdate.current = true; // Set flag for remote update
         editorRef.current.setValue(data.text);
-        console.log(data.text);
         onCodeChange(data.text);
       }
     });
@@ -93,11 +94,16 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     editor.setValue(initialCode);
   };
 
+  const handleLanguageChange = (language: string) => {
+    setSelectedLanguage(language);
+    onLanguageChange(language);
+  }
+
   return (
     <div>
       <select
         className="text-black mb-2"
-        onChange={(e) => setSelectedLanguage(e.target.value)}
+        onChange={(e) => handleLanguageChange(e.target.value)}
         value={selectedLanguage}
       >
         <option value="c">C</option>

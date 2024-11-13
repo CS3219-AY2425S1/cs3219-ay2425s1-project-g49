@@ -42,7 +42,6 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
 
 		const checkUpdate = async (email: string) => {
 			try {
-				console.log("checking update")
 				const response = await fetch(`http://localhost:3001/users/update_token/${email}`, {
 					method: "GET",
 					headers: {
@@ -64,7 +63,6 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
 
 		const jwtToken = localStorage.getItem("access_token");
 		if (jwtToken) {
-			console.log("from provider")
 			const { tokenStatus, email } = isTokenValid(jwtToken);
 			if (tokenStatus) {
 				checkUpdate(email);
