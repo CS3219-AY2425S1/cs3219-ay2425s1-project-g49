@@ -40,7 +40,7 @@ export default function CollaborationPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const requestData = location.state;
-  const [language, setLanguage] = useState<string>(requestData.language);
+  const [language, setLanguage] = useState<string>(requestData?.language || "");
   const { roomId } = useParams();
   const editorRef = useRef<any>(null);
 
