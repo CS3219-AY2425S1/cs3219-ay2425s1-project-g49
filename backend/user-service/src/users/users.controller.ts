@@ -8,6 +8,7 @@ import {
   Patch,
   Delete,
   ConflictException,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from '../dto/CreateUser.dto';
@@ -17,17 +18,6 @@ import { UpdateUserDto } from '../dto/UpdateUser.dto';
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) { }
-
-  @Post()
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    const existingUser = await this.usersService.getUserByEmail(createUserDto.email);
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    } else {
-      console.log("CREATED USER", createUserDto)
-      return this.usersService.createUser(createUserDto);
-    }
-  }
 
   @Get()
   getUsers() {
@@ -52,9 +42,11 @@ export class UsersController {
   async updateUser(
     @Param('email') email: string,
     @Body() updateUserDto: UpdateUserDto,
+    @Request() req,
   ) {
+    const adminSecretKey = req.headers['admin-secret-key']
     console.log("user update endpoint reached", updateUserDto)
-    const updatedUser = await this.usersService.updateUsers(email, updateUserDto);
+    const updatedUser = await this.usersService.updateUsers(email, updateUserDto, adminSecretKey);
     if (!updatedUser) throw new HttpException('User not Found', 404);
     return updatedUser;
   }

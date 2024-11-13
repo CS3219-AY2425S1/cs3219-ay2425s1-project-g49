@@ -1,12 +1,15 @@
-.myModal .header,
+.myModal .header {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
 .myModal .content,
 .myModal .actions {
-  background-color: #1e1e1e !important;
+  background-color: #2A2A2A !important;
   color: white !important;
 }
 
 .myModalButton {
-  background-color: #3c3c3c !important;
+  background-color: #1e1e1e !important;
   color: white !important;
   font: bold;
 }

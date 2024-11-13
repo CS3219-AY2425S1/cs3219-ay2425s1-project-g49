@@ -6,12 +6,13 @@ import { Button, Icon, Table, Accordion } from "semantic-ui-react";
 import SolvedQuestionTable from "../components/SolvedQuestionsTable";
 
 interface tokenQuestions {
-  id: number;
-  title: string;
-  solution: string;
-  language: string;
-  complexity: string;
-  time: string;
+    id: number;
+    title: string;
+    solution: string;
+    language: string;
+    complexity: string;
+    categories: string;
+    time: string;
 }
 
 interface CustomJwtPayload extends JwtPayload {
@@ -75,6 +76,10 @@ export default function MatchingPage() {
     navigate("/profile");
   };
 
+  const questionpage = () => {
+    navigate("/questions-page");
+  };
+
   const [selectedTopic, setSelectedTopic] = useState(topic[0]);
   const [selectedDificulty, setSelectedDifficulty] = useState(difficulty[0]);
   const [selectedLanguage, setSelectedLanguage] = useState(lang[0]);
@@ -120,6 +125,16 @@ export default function MatchingPage() {
           PeerPrep
         </h1>
         <div className="flex-1"></div>
+        <Button
+          icon
+          circular
+          className="flex items-center px-4"
+          color="google plus"
+          onClick={questionpage}
+        >
+          <Icon name="book" />
+          <span className="ml-2">Questions Page</span>
+        </Button>
         <Button
           icon
           circular

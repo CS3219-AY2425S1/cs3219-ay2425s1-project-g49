@@ -1,4 +1,4 @@
-import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 
 export class SolutionDto {
@@ -23,6 +23,9 @@ export class SolutionDto {
   complexity: string;
 
   @IsNotEmpty()
+  categories: string;
+
+  @IsNotEmpty()
   @IsString()
   time: string;
 }
@@ -34,15 +37,15 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
+  role?: string;
+
+  @IsOptional()
+  @IsString()
   email?: string;
 
   @IsOptional()
   @IsString()
   avatarUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  displayName?: string;
 
   @IsOptional()
   @IsArray()

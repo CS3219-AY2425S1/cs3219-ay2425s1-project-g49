@@ -10,6 +10,9 @@ interface tokenQuestions {
   id: number;
   title: string;
   solution: string;
+  language: string;
+  complexity: string;
+  categories: string;
   time: string;
 }
 
@@ -37,6 +40,7 @@ export default function CollaborationPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const requestData = location.state;
+  const [language, setLanguage] = useState<string>(requestData.language);
   const { roomId } = useParams();
   const editorRef = useRef<any>(null);
 
@@ -129,7 +133,6 @@ export default function CollaborationPage() {
   }
 
   const endCollab = async () => {
-    console.log("code is", code);
     const response = await fetch("http://localhost:3008/collab/end_collab", {
       method: "POST",
       headers: {
@@ -142,8 +145,9 @@ export default function CollaborationPage() {
           id: question?.id,
           title: question?.title,
           solution: code.replace(/\n/g, "\\n"),
-          language: requestData.language,
-          complexity: question?.complexity,
+          language: language,
+          complexity: question?.complexity, 
+          categories: question?.categories,
           time: new Date().toLocaleString(),
         },
       }),
@@ -166,6 +170,13 @@ export default function CollaborationPage() {
       setCode(value);
     }
   };
+
+  const handleLanguageChange = (value: string | undefined) => {
+    if (value) {
+      setLanguage(value);
+    }
+  };
+
 
   const formatCode = () => {
     if (editorRef.current) {
@@ -222,6 +233,7 @@ export default function CollaborationPage() {
               sessionId={roomId!}
               onCodeChange={handleEditorChange}
               initialCode={code}
+              onLanguageChange={handleLanguageChange}
             />
           </Grid.Column>
         </Grid.Row>
