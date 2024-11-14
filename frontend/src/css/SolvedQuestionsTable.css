@@ -1,0 +1,30 @@
+.myModal .header {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
+.myModal .content,
+.myModal .actions {
+  background-color: #2A2A2A !important;
+  color: white !important;
+}
+
+.myModalButton {
+  background-color: #1e1e1e !important;
+  color: white !important;
+  font: bold;
+}
+.myModalButton:hover {
+  background-color: #2f2f2f !important;
+  color: white !important;
+  font: bold;
+}
+
+.remote-cursor {
+  border-left: 2px solid red; 
+  opacity: 0.8;
+}
+
+
+.solvedTable:hover {
+  cursor: grab;
+}

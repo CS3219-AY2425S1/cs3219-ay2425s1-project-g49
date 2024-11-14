@@ -1,0 +1,58 @@
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    depends_on:
+      - user-service
+      - question-service
+      - matching-service
+      - collaboration-service
+      - chat-service
+      - rabbitmq
+    environment:
+      - REACT_APP_GOOGLE_API_KEY=AIzaSyB1S-ZSxrNg0j388tqN94VyRqfwS5PxBII
+
+  user-service:
+    build: ./backend/user-service
+    ports:
+      - 3001:3001
+
+  question-service:
+    build: ./backend/question-service
+    ports:
+      - 3002:3002
+
+  matching-service:
+    build: ./backend/matching-service
+    restart: on-failure
+    ports:
+      - 3009:3009
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  collaboration-service:
+    build: ./backend/collaboration-service
+    restart: on-failure
+    ports:
+      - "3008:3008"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  chat-service:
+    build: ./backend/chat-service
+    ports:
+      - 3003:3003
