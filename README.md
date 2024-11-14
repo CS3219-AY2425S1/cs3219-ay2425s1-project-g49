@@ -2,7 +2,12 @@
 # CS3219 Project (PeerPrep) - AY2425S1
 ## Group: G49
 
-### Note: 
-- You can choose to develop individual microservices within separate folders within this repository **OR** use individual repositories (all public) for each microservice. 
-- In the latter scenario, you should enable sub-modules on this GitHub classroom repository to manage the development/deployment **AND** add your mentor to the individual repositories as a collaborator. 
-- The teaching team should be given access to the repositories as we may require viewing the history of the repository in case of any disputes or disagreements. 
+
+### Instuctions to run the application
+- Clone the project from github
+- Navigate to the main folder `cs3219-ay2425s1-project-g49` that contains `docker-compose.yml` file
+- Run the following command to start the application: `docker-compose up -d`
+- To rebuild images and start the application: `docker-compose up -d --build`
+
+
+
